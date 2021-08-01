@@ -32,10 +32,6 @@ plt.show()
 
 best_h = h[best]
 print("h: "+str(best_h))
-#x = (x*6)-3  #normal
-#x = (x*5)-0  #exponencial
-#x = (x*16)-8 #laplace
-#x = (x*max(data)*2)-max(data)
 xx = np.linspace(min(data), max(data), X_AMOUNT)
 kde_result = []
 for i in range(xx.shape[0]):
@@ -43,4 +39,4 @@ for i in range(xx.shape[0]):
 plt.figure(1)
 plt.hist(data, bins=25, density=True)
 plt.plot(xx, kde_result, color='red')
-plt.show() 
+plt.show()
