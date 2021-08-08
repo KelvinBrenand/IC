@@ -39,7 +39,9 @@ def nrm(x, data, h):
     funcReturn = frac_result(x, data, best_h)
     frac = funcReturn[0]/funcReturn[1]
     while abs(frac) >= 0.01:
+        print(best_h)
         funcReturn = frac_result(x, data, best_h)
         frac = funcReturn[0]/funcReturn[1]
         best_h = best_h - frac
+    print(best_h)
     return best_h
