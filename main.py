@@ -6,25 +6,17 @@ import time
 DATA_SIZE = 1000
 X_AMOUNT = 50
 H_AMOUNT = 100
-data = np.random.randn(DATA_SIZE).tolist()
-#data = np.random.exponential(1.0, DATA_SIZE).tolist()
+
+#data = np.random.randn(DATA_SIZE).tolist()
+data = np.random.exponential(1.0, DATA_SIZE).tolist()
 #data = np.random.laplace(0.0, 1.0, DATA_SIZE).tolist()
-#h = np.linspace(0.01, 2, H_AMOUNT)
 x = np.random.rand(X_AMOUNT)
-x = np.sort(x)
 
-# mle_result = mle(h, x, data)
-# best = mle_result.index(max(mle_result))
-# print("The best \'h\' is "+str(h[best])+".")
-# plt.figure(1)
-# plt.plot(h, mle_result, color='red')
-# plt.ylabel('Maximum Likelihood Estimation (MLE)')
-# plt.xlabel('\'h\' parameter')
-# plt.show()
+# h = np.linspace(0.01, 2, H_AMOUNT) #mle
+# x = np.sort(x)                     #mle
 
-
-#best_h = h[best]
 tempoi = time.time()
+#best_h = mle(h, x, data)
 best_h = nrm(x, data, 1.0)
 tempototal = time.time() - tempoi
 print("The best \'h\' is: "+str(best_h)+".")
