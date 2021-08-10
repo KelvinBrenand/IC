@@ -33,7 +33,7 @@ def frac_result(x, data, h):
         sumBottom = sum(bottom)
         resultFirstDer.append(sumTop/(sumBottom*h*h*h))
         resultSecDer.append((sumTop*-3)/(sumBottom*h*h*h*h))
-    return sum(resultFirstDer)-(len(x)/h), sum(resultSecDer)-(len(x)/(h*h))
+    return sum(resultFirstDer)-(len(x)/h), sum(resultSecDer)+(len(x)/(h*h))
 def nrm(x, data, h):
     best_h = h
     funcReturn = frac_result(x, data, best_h)
