@@ -1,4 +1,4 @@
-from functions import kde, mle, nrm
+from functions import functions
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import estimate_bandwidth
@@ -18,7 +18,8 @@ x = np.random.rand(X_AMOUNT)
 
 tempoi = time.time()
 #best_h = mle(h, x, data)
-best_h = nrm(x, data, 1.0)
+obj = functions()
+best_h = obj.nrm(x, data, 1.0)
 
 # arr = np.array(data)
 # arr = np.reshape(arr, (1000, 1))
@@ -29,7 +30,7 @@ print("Time: "+str(tempototal)+"s.")
 xx = np.linspace(min(data), max(data), X_AMOUNT)
 kde_result = []
 for i in range(xx.shape[0]):
-    kde_result.append(kde(xx[i], data, best_h))
+    kde_result.append(obj.kde(xx[i], data, best_h))
 plt.figure(2)
 plt.hist(data, bins=25, density=True)
 plt.plot(xx, kde_result, color='red')
