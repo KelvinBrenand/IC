@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 class functions(object):
     def __init__(self):
@@ -48,3 +49,12 @@ class functions(object):
             best_h = best_h - frac
         print(best_h)
         return best_h
+    ######################### D DIMENSIONAL ##########################
+    def __kernelNormal(self, x, H):
+        return ((2*math.pi)**(-len(x)/2))*((np.linalg.det(H))**(-0.5))*math.exp(-0.5*H.transpose()*np.linalg.inv(H)*x)
+    def mkde(self, x, array, H):
+        N = len(array)
+        sum = 0
+        for i in range(N):
+            sum += self.__kernelNormal(self, (x - array[i])/H, H)
+        return sum/(N*H)
