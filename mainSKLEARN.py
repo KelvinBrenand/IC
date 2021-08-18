@@ -5,7 +5,7 @@ from sklearn.cluster import estimate_bandwidth
 import time
 
 DATA_SIZE = 1000
-X_AMOUNT = 50
+X_AMOUNT = 500
 np.random.seed(seed=123)
 data = np.random.randn(DATA_SIZE).tolist()
 #data = np.random.exponential(1.0, DATA_SIZE).tolist()
