@@ -3,10 +3,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 
-DATA_SIZE = 1000
+DATA_SIZE = 100
 X_AMOUNT = 50
 np.random.seed(seed=123)
-data = np.random.randn(DATA_SIZE).tolist()
+
+data = np.random.randn(DATA_SIZE).tolist()+(np.random.randn(DATA_SIZE)+1).tolist()
 #data = np.random.exponential(1.0, DATA_SIZE).tolist()
 #data = np.random.laplace(0.0, 1.0, DATA_SIZE).tolist()
 x = np.random.rand(X_AMOUNT)
