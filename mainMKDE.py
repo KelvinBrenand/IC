@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 obj = functions()
 DATA_SIZE = 1000
-X_AMOUNT = 5
+X_AMOUNT = 50
 mean = [0, 0]
 cov = [[1, 0], [0, 1]]
 data = np.random.multivariate_normal(mean, cov, DATA_SIZE)
