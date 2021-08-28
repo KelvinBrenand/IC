@@ -1,6 +1,5 @@
 from functions import functions
 import numpy as np
-import matplotlib.pyplot as plt
 
 obj = functions()
 DATA_SIZE = 1000
@@ -12,7 +11,7 @@ x = np.random.multivariate_normal(mean, cov, X_AMOUNT)
 best_h = 2.0
 kde_result = []
 for i in range(len(x)):
-    kde_result.append(obj.mkde(x[i], data, best_h))
+    kde_result.append(obj.multidimensionalKernelDensityEstimation(x[i], data, best_h))
 
 kdeFinal = np.array(kde_result)
 print(kdeFinal, kdeFinal.shape)
