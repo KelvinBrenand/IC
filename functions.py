@@ -6,11 +6,20 @@ class functions(object):
         pass
     def __gaussian(self, x):
         return ((1/math.sqrt(2*math.pi))*math.exp(-0.5*(x**2)))
-    def kernelDensityEstimation(self, x, data, h):
-        sum = 0
+    def kernelDensityEstimation(self, data, h):
+        #Leave one out
+        kde_result = []
+        databkp = data.copy()
         for i in range(len(data)):
-            sum += self.__gaussian((x - data[i])/h)
-        return sum/(len(data)*h)
+            element = databkp[i]
+            databkp.pop(i)
+            sum = 0
+            for i in range(len(data)):
+                sum += self.__gaussian((element - data[i])/h)
+            kde_result.append(sum/(len(data)*h))
+            databkp.clear()
+            databkp = data.copy()
+        return kde_result
     def maximumLikelihoodEstimation(self, h, x, data):
         auxVar = [None] * len(x)
         mle = []
@@ -21,7 +30,7 @@ class functions(object):
         best = mle.index(max(mle))
         best_h = h[best]
         return best_h
-    def __frac_resultLeaveOneOut(self, data, h):
+    def __fracResult(self, data, h):
         resultFirstDer = []
         resultSecDer = []
         databkp = data.copy()
@@ -41,13 +50,14 @@ class functions(object):
             resultFirstDer.append(sumTop/(sumBottom*h*h*h))
             resultSecDer.append((sumTop*-3)/(sumBottom*h*h*h*h))
         return sum(resultFirstDer)-(len(data)/h), sum(resultSecDer)+(len(data)/(h*h))
-    def newtonRaphsonLeaveOneOut(self,data, h):
+    def newtonRaphson(self, data, h):
+        #Leave one out
         best_h = h
-        funcReturn = self.__frac_resultLeaveOneOut(data, best_h)
+        funcReturn = self.__fracResult(data, best_h)
         frac = funcReturn[0]/funcReturn[1]
         while abs(frac) >= 0.01:
             print(best_h)
-            funcReturn = self.__frac_resultLeaveOneOut(data, best_h)
+            funcReturn = self.__fracResult(data, best_h)
             frac = funcReturn[0]/funcReturn[1]
             best_h = best_h - frac
         print(best_h)
@@ -58,8 +68,50 @@ class functions(object):
         b = ((np.linalg.det(H))**(-0.5))
         c = np.exp(-0.5*x.transpose()*np.linalg.inv(H)*x)
         return a*b*c
-    def multidimensionalKernelDensityEstimation(self, x, data, h):
-        sum = 0
+    def multidimensionalKernelDensityEstimation(self, data, h):
+        #Leave one out
+        kde_result = []
+        databkp = data
         for i in range(len(data)):
-            sum += self.__multidimensionalGaussian((x - data[i])/h)
-        return sum/(len(data)*h**x.ndim)
+            element = databkp[i]
+            databkp = np.delete(databkp, i, 0)
+            sum = 0
+            for i in range(len(data)):
+                sum += self.__multidimensionalGaussian((element - data[i])/h)
+            kde_result.append(sum/(len(data)*h**element.ndim))
+            databkp = data
+        return kde_result
+    #################################################################
+    def __multidimensionalFracResult(self, data, h):
+        H = np.array([[1.0, 0.0],[0.0, 1.0]])
+        resultFirstDer = []
+        resultSecDer = []
+        databkp = data
+        for i in range(len(data)):
+            top = []
+            bottom = []
+            element = databkp[i]
+            databkp = np.delete(databkp, i, 0)
+            for j in range(len(databkp)):
+                varAux = self.__multidimensionalGaussian((element - databkp[j])/h)
+                top.append(varAux*(1/(h*h*h))*(element - databkp[j]).transpose()*np.linalg.inv(H)*(element - databkp[j]))
+                bottom.append(varAux)
+            databkp = data
+            sumTop = sum(top)
+            sumBottom = sum(bottom)
+            resultFirstDer.append(sumTop/sumBottom)
+            resultSecDer.append((sumTop*-3)/(sumBottom*h*h*h*h))
+        return sum(resultFirstDer)-(len(data)*data.ndim/h), sum(resultSecDer)+(len(data)*data.ndim/(h*h))
+    def multivariateNewtonRaphson(self, data, h):
+        #Leave one out
+        best_h = h
+        funcReturn = self.__multidimensionalFracResult(data, best_h)
+        frac = funcReturn[0]/funcReturn[1]
+        print(funcReturn)
+        while abs(frac) >= 0.01:
+            print(best_h)
+            funcReturn = self.__multidimensionalFracResult(data, best_h)
+            frac = funcReturn[0]/funcReturn[1]
+            best_h = best_h - frac
+        print(best_h)
+        return best_h
