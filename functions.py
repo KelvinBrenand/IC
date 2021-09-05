@@ -62,6 +62,8 @@ class functions(object):
             best_h = best_h - frac
         print(best_h)
         return best_h
+
+        
     def __multidimensionalGaussian(self, x):
         H = np.array([[1.0, 0.0],[0.0, 1.0]])
         a = ((2*math.pi)**(-x.ndim/2))
@@ -81,7 +83,6 @@ class functions(object):
             kde_result.append(sum/(len(data)*h**element.ndim))
             databkp = data
         return kde_result
-    #################################################################
     def __multidimensionalFracResult(self, data, h):
         H = np.array([[1.0, 0.0],[0.0, 1.0]])
         resultFirstDer = []
@@ -102,7 +103,7 @@ class functions(object):
             resultFirstDer.append(sumTop/sumBottom)
             resultSecDer.append((sumTop*-3)/(sumBottom*h*h*h*h))
         return sum(resultFirstDer)-(len(data)*data.ndim/h), sum(resultSecDer)+(len(data)*data.ndim/(h*h))
-    def multivariateNewtonRaphson(self, data, h):
+    def multidimentionalNewtonRaphson(self, data, h):
         #Leave one out
         best_h = h
         funcReturn = self.__multidimensionalFracResult(data, best_h)
