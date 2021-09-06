@@ -1,14 +1,17 @@
 from functions import functions
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 np.random.seed(seed=123)
 DATA_SIZE = 500
 
-data = np.random.randn(DATA_SIZE).tolist()+(np.random.randn(DATA_SIZE)+4).tolist()
+data = np.random.randn(DATA_SIZE)
+print(data.shape)
+data = data.tolist()
 obj = functions()
 
 best_h = obj.newtonRaphson(data, 1.0)
 kde_result = obj.kernelDensityEstimation(data, best_h)
+print(np.array(kde_result).shape)
 
 sorted_kde_result = [x for _,x in sorted(zip(data, kde_result))]
 

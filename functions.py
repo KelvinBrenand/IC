@@ -68,7 +68,7 @@ class functions(object):
         H = np.array([[1.0, 0.0],[0.0, 1.0]])
         a = ((2*math.pi)**(-x.ndim/2))
         b = ((np.linalg.det(H))**(-0.5))
-        c = np.exp(-0.5*x.transpose()*np.linalg.inv(H)*x)
+        c = np.exp(-0.5*np.dot(np.dot(x, np.linalg.inv(H)), x.T))
         return a*b*c
     def multidimensionalKernelDensityEstimation(self, data, h):
         #Leave one out
@@ -95,7 +95,7 @@ class functions(object):
             databkp = np.delete(databkp, i, 0)
             for j in range(len(databkp)):
                 varAux = self.__multidimensionalGaussian((element - databkp[j])/h)
-                top.append(varAux*(1/(h*h*h))*(element - databkp[j]).transpose()*np.linalg.inv(H)*(element - databkp[j]))
+                top.append(varAux*(1/(h*h*h))*np.dot(np.dot((element - databkp[j]).T, np.linalg.inv(H)), (element - databkp[j])))
                 bottom.append(varAux)
             databkp = data
             sumTop = sum(top)
@@ -108,7 +108,6 @@ class functions(object):
         best_h = h
         funcReturn = self.__multidimensionalFracResult(data, best_h)
         frac = funcReturn[0]/funcReturn[1]
-        print(funcReturn)
         while abs(frac) >= 0.01:
             print(best_h)
             funcReturn = self.__multidimensionalFracResult(data, best_h)
