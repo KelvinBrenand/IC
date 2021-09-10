@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from numpy.core.numeric import identity
 
 class functions(object):
     def __init__(self):
@@ -63,9 +64,13 @@ class functions(object):
         print(best_h)
         return best_h
 
-        
+    def __identityMatrix(self, n):
+        m=[[0 for x in range(n)] for y in range(n)]
+        for i in range(0,n):
+            m[i][i] = 1
+        return m
     def __multidimensionalGaussian(self, x):
-        H = np.array([[1.0, 0.0],[0.0, 1.0]])
+        H = self.__identityMatrix(len(x))
         a = ((2*math.pi)**(-x.ndim/2))
         b = ((np.linalg.det(H))**(-0.5))
         c = np.exp(-0.5*np.dot(np.dot(x, np.linalg.inv(H)), x.T))
@@ -84,7 +89,7 @@ class functions(object):
             databkp = data
         return kde_result
     def __multidimensionalFracResult(self, data, h):
-        H = np.array([[1.0, 0.0],[0.0, 1.0]])
+        H = self.__identityMatrix(data.ndim)
         resultFirstDer = []
         resultSecDer = []
         databkp = data
@@ -103,7 +108,7 @@ class functions(object):
             resultFirstDer.append(sumTop/sumBottom)
             resultSecDer.append((sumTop*-3)/(sumBottom*h*h*h*h))
         return sum(resultFirstDer)-(len(data)*data.ndim/h), sum(resultSecDer)+(len(data)*data.ndim/(h*h))
-    def multidimentionalNewtonRaphson(self, data, h):
+    def multidimensionalNewtonRaphson(self, data, h):
         #Leave one out
         best_h = h
         funcReturn = self.__multidimensionalFracResult(data, best_h)
