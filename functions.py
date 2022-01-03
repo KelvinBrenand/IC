@@ -1,6 +1,4 @@
 import math
-import numpy as np
-from numpy.core.numeric import identity
 
 class functions(object):
     def __init__(self):
@@ -65,49 +63,80 @@ class functions(object):
         return best_h
 
     def __identityMatrix(self, n):
-        m=[[0 for x in range(n)] for y in range(n)]
+        m=[[0. for x in range(n)] for y in range(n)]
         for i in range(0,n):
-            m[i][i] = 1
+            m[i][i] = 1.
         return m
+    def __ndim(self, x):
+        if isinstance(x[0], float):
+            return 1
+        return len(x[0])
+    def __listSubtraction(self, x, y):
+        result = []
+        for i in range(len(x)):
+            result.append(x[i] - y[i])
+        return result
+    def __listDivision(self, x, y):
+        result = []
+        for i in range(len(x)):
+            result.append(x[i]/y)
+        return result
+    def __dot(self, A,B):
+        try:
+            auxVar = len(B[0])
+            result = [0.] * len(A)
+            for i in range(len(A)):
+                for j in range(len(B)):
+                    result[i] += A[j] * B[j][i]
+        except:
+            result = 0.
+            for i in range(len(A)):
+                result += A[i]*B[i]
+        return result
     def __multidimensionalGaussian(self, x):
         H = self.__identityMatrix(len(x))
-        a = ((2*math.pi)**(-x.ndim/2))
-        b = ((np.linalg.det(H))**(-0.5))
-        c = np.exp(-0.5*np.dot(np.dot(x, np.linalg.inv(H)), x.T))
+        idenMatrixDet = 1.0
+        idenMatrixInv = H
+        a = ((2*math.pi)**(-self.__ndim(x)/2))
+        b = ((idenMatrixDet)**(-0.5))
+        c = math.exp(-0.5*self.__dot(self.__dot(x, idenMatrixInv), x)) #x.T
         return a*b*c
     def multidimensionalKernelDensityEstimation(self, data, h):
         #Leave one out
         kde_result = []
-        databkp = data
+        data = data.tolist()
+        databkp = data.copy()
         for i in range(len(data)):
             element = databkp[i]
-            databkp = np.delete(databkp, i, 0)
+            databkp.pop(i)
             sum = 0
             for i in range(len(data)):
-                sum += self.__multidimensionalGaussian((element - data[i])/h)
-            kde_result.append(sum/(len(data)*h**element.ndim))
-            databkp = data
+                sum += self.__multidimensionalGaussian(self.__listDivision(self.__listSubtraction(element, data[i]), h))
+            kde_result.append(sum/(len(data)*h**self.__ndim(element)))
+            databkp = data.copy()
         return kde_result
     def __multidimensionalFracResult(self, data, h):
-        H = self.__identityMatrix(data.ndim)
+        H = self.__identityMatrix(self.__ndim(data))
+        idenMatrixInv = H
         resultFirstDer = []
         resultSecDer = []
-        databkp = data
+        data = data.tolist()
+        databkp = data.copy()
         for i in range(len(data)):
             top = []
             bottom = []
             element = databkp[i]
-            databkp = np.delete(databkp, i, 0)
+            databkp.pop(i)
             for j in range(len(databkp)):
-                varAux = self.__multidimensionalGaussian((element - databkp[j])/h)
-                top.append(varAux*(1/(h*h*h))*np.dot(np.dot((element - databkp[j]).T, np.linalg.inv(H)), (element - databkp[j])))
+                varAux = self.__multidimensionalGaussian(self.__listDivision(self.__listSubtraction(element, databkp[j]), h))
+                top.append(varAux*(1/(h*h*h))*self.__dot(self.__dot(self.__listSubtraction(element, databkp[j]), idenMatrixInv), self.__listSubtraction(element, databkp[j])))
                 bottom.append(varAux)
-            databkp = data
+            databkp = data.copy()
             sumTop = sum(top)
             sumBottom = sum(bottom)
             resultFirstDer.append(sumTop/sumBottom)
             resultSecDer.append((sumTop*-3)/(sumBottom*h*h*h*h))
-        return sum(resultFirstDer)-(len(data)*data.ndim/h), sum(resultSecDer)+(len(data)*data.ndim/(h*h))
+        return sum(resultFirstDer)-(len(data)*self.__ndim(data)/h), sum(resultSecDer)+(len(data)*self.__ndim(data)/(h*h))
     def multidimensionalNewtonRaphson(self, data, h):
         #Leave one out
         best_h = h
