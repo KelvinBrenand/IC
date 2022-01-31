@@ -18,31 +18,31 @@ DATA_SIZE = 100
 # plt.show()
 
 # N Dimensional
-mean = [0, 0]
-cov = [[1, 0], 
-        [0, 1]]
+# mean = [0, 0]
+# cov = [[1, 0], 
+#         [0, 1]]
 
-mean2 = [2, 2]
-cov2 = [[1, -0.8], 
-        [-0.8, 1]]
+# mean2 = [2, 2]
+# cov2 = [[1, -0.8], 
+#         [-0.8, 1]]
 
-data1 = np.random.multivariate_normal(mean, cov, DATA_SIZE)
-data2 = np.random.multivariate_normal(mean2, cov2, DATA_SIZE)
-data = np.concatenate((data1,data2))
+# data1 = np.random.multivariate_normal(mean, cov, DATA_SIZE)
+# data2 = np.random.multivariate_normal(mean2, cov2, DATA_SIZE)
+# data = np.concatenate((data1,data2))
 
-x, y = data.T
-data = data.tolist()
-obj = multivariateNewtonRapson()
-best_h = obj.multivariateNewtonRaphson(data)
-kde_result = obj.multivariateKernelDensityEstimation(data, best_h)
-print("\nh = "+str(best_h)+"\n")
+# x, y = data.T
+# data = data.tolist()
+# obj = multivariateNewtonRapson()
+# best_h = obj.multivariateNewtonRaphson(data)
+# kde_result = obj.multivariateKernelDensityEstimation(data, best_h)
+# print("\nh = "+str(best_h)+"\n")
 
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-scatt = ax.scatter(x, y, kde_result, c=np.abs(kde_result), cmap=plt.get_cmap("viridis"), marker='o')
-ax.set_xlabel('X')
-ax.set_ylabel('Y')
-ax.set_zlabel('KDE')
-plt.title('Multivariate Newton-Raphson Method')
-fig.colorbar(scatt, shrink=0.5,location="left", aspect=7)
-plt.show()
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+# scatt = ax.scatter(x, y, kde_result, c=np.abs(kde_result), cmap=plt.get_cmap("viridis"), marker='o')
+# ax.set_xlabel('X')
+# ax.set_ylabel('Y')
+# ax.set_zlabel('KDE')
+# plt.title('Multivariate Newton-Raphson Method')
+# fig.colorbar(scatt, shrink=0.5,location="left", aspect=7)
+# plt.show()
