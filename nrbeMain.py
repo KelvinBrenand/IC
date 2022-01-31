@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 np.random.seed(seed=123)
 DATA_SIZE = 100
-#reValue = 10
 
 #1 Dimensional
 # data = np.random.randn(DATA_SIZE).tolist()+(np.random.randn(DATA_SIZE)+4).tolist()
@@ -19,38 +18,31 @@ DATA_SIZE = 100
 # plt.show()
 
 # N Dimensional
-# mean = [0, 0]
-# cov = [[1, 0], [0, 1]]
-# data = np.random.multivariate_normal(mean, cov, DATA_SIZE)
-# x, y = data.T
-# data = data.tolist()
-# obj = multivariateNewtonRapson()
-# best_h = obj.multivariateNewtonRaphson(data)
-# kde_result = obj.multivariateKernelDensityEstimation(data, best_h)
+mean = [0, 0]
+cov = [[1, 0], 
+        [0, 1]]
 
-# fig = plt.figure()
-# ax = fig.add_subplot(111, projection='3d')
-# scatt = ax.scatter(x, y, kde_result, c=np.abs(kde_result), cmap=plt.get_cmap("viridis"), marker='o')
-# ax.set_xlabel('X')
-# ax.set_ylabel('Y')
-# ax.set_zlabel('KDE')
-# plt.title('Multivariate Newton-Raphson Method')
-# fig.colorbar(scatt, shrink=0.5,location="left", aspect=7)
-# plt.show()
+mean2 = [2, 2]
+cov2 = [[1, -0.8], 
+        [-0.8, 1]]
 
-# x = np.reshape(x, (reValue, reValue))
-# y = np.reshape(y, (reValue, reValue))
-# z = np.reshape(kde_result, (reValue, reValue))
+data1 = np.random.multivariate_normal(mean, cov, DATA_SIZE)
+data2 = np.random.multivariate_normal(mean2, cov2, DATA_SIZE)
+data = np.concatenate((data1,data2))
 
-# fig = plt.figure()
-# ax = fig.add_subplot(projection='3d')
-# surf = ax.plot_surface(x, y, z, rstride=1, cstride=1, cmap="viridis", antialiased=False)
-# ax.set_zlim(0, 0.2)
-# ax.zaxis.set_major_locator(plt.LinearLocator(10))
-# ax.zaxis.set_major_formatter(plt.FormatStrFormatter('%.02f'))
-# ax.set_xlabel('X')
-# ax.set_ylabel('Y')
-# ax.set_zlabel('KDE')
-# plt.title('Multidimensional Newton-Raphson Method')
-# fig.colorbar(surf, shrink=0.5,location="left", aspect=7)
-# plt.show()
+x, y = data.T
+data = data.tolist()
+obj = multivariateNewtonRapson()
+best_h = obj.multivariateNewtonRaphson(data)
+kde_result = obj.multivariateKernelDensityEstimation(data, best_h)
+print("\nh = "+str(best_h)+"\n")
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+scatt = ax.scatter(x, y, kde_result, c=np.abs(kde_result), cmap=plt.get_cmap("viridis"), marker='o')
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('KDE')
+plt.title('Multivariate Newton-Raphson Method')
+fig.colorbar(scatt, shrink=0.5,location="left", aspect=7)
+plt.show()
