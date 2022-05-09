@@ -1,7 +1,7 @@
 from nrbe import newtonRapson, multivariateNewtonRapson
 import matplotlib.pyplot as plt
 import numpy as np
-np.random.seed(seed=123)
+np.random.seed(seed=23)
 DATA_SIZE = 100
 
 #1 Dimensional

@@ -47,16 +47,18 @@ class newtonRapson(object):
             resultSecDer.append((sumTop*-3)/(sumBottom*h*h*h*h))
         return sum(resultFirstDer)-(len(data)/h), sum(resultSecDer)+(len(data)/(h*h))
     
-    def newtonRaphson(self, data, h=1.0, epsilon=0.01):
+    def newtonRaphson(self, data, h=1.0, epsilon=0.01, max_iter=20):
         """Performs the Newton-Raphson's method to estimate the best value to the Kernel Density Estimation (KDE) bandwidth parameter.
 
         Args:
             data (list): Datapoints to estimate from.
             h (float): Initial bandwidth value, default=1.0
             epsilon(float): The method's threshold, defaut=0.01
+            max_iter(int): Maximum number of iterations
 
         Returns:
             float: The best bandwidth value considering the input data.
+            None:  If the method finds a 0 derivative or maximum number of iterations is reached 
 
         Error Messages:
             EXIT_FAIL_INVALID_DATA_TYPE: Input set type must be a list.
@@ -84,10 +86,16 @@ class newtonRapson(object):
         best_h = h
         funcReturn = self.__fracResult(data, best_h)
         frac = funcReturn[0]/funcReturn[1]
+        count = 0
         while abs(frac) >= epsilon:
             funcReturn = self.__fracResult(data, best_h)
+            if funcReturn[1] == 0:
+                return None
             frac = funcReturn[0]/funcReturn[1]
             best_h = best_h - frac
+            count = count+1
+            if count >= max_iter:
+                return None
         return best_h
     
     def kernelDensityEstimation(self, data, h):
@@ -121,8 +129,8 @@ class newtonRapson(object):
             element = databkp[i]
             databkp.pop(i)
             sum = 0
-            for i in range(len(data)):
-                sum += self.__gaussian((element - data[i])/h)
+            for i in range(len(databkp)):
+                sum += self.__gaussian((element - databkp[i])/h)
             kde_result.append(sum/(len(data)*h))
             databkp.clear()
             databkp = data.copy()
@@ -256,16 +264,18 @@ class multivariateNewtonRapson(object):
             resultSecDer.append((sumTop*-3)/(sumBottom*h*h*h*h))
         return sum(resultFirstDer)-(len(data)*self.__ndim(data)/h), sum(resultSecDer)+(len(data)*self.__ndim(data)/(h*h))
     
-    def multivariateNewtonRaphson(self, data, h=1.0, epsilon=0.01):
+    def multivariateNewtonRaphson(self, data, h=1.0, epsilon=0.01, max_iter=20):
         """Performs the Multivariate Newton-Raphson's method to estimate the best value to the Multivariate Kernel Density Estimation (MKDE) bandwidth parameter.
 
         Args:
             data (list): Datapoints to estimate from.
             h (float): Initial bandwidth value, default=1.0
             epsilon(float): The method's threshold, defaut=0.01
+            max_iter(int): Maximum number of iterations
 
         Returns:
             float: The best bandwidth value considering the input data.
+            None:  If the method finds a 0 derivative or maximum number of iterations is reached
 
         Error Messages:
             EXIT_FAIL_INVALID_DATA_TYPE: Input set type must be a list.
@@ -293,10 +303,16 @@ class multivariateNewtonRapson(object):
         best_h = h
         funcReturn = self.__multivariateFracResult(data, best_h)
         frac = funcReturn[0]/funcReturn[1]
+        count = 0
         while abs(frac) >= epsilon:
             funcReturn = self.__multivariateFracResult(data, best_h)
+            if funcReturn[1] == 0:
+                return None
             frac = funcReturn[0]/funcReturn[1]
             best_h = best_h - frac
+            count = count+1
+            if count >= max_iter:
+                return None
         return best_h
 
     def multivariateKernelDensityEstimation(self, data, h):
@@ -330,8 +346,8 @@ class multivariateNewtonRapson(object):
             element = databkp[i]
             databkp.pop(i)
             sum = 0
-            for i in range(len(data)):
-                sum += self.__multivariateGaussian(self.__listDivision(self.__listSubtraction(element, data[i]), h))
+            for i in range(len(databkp)):
+                sum += self.__multivariateGaussian(self.__listDivision(self.__listSubtraction(element, databkp[i]), h))
             kde_result.append(sum/(len(data)*h**self.__ndim(element)))
             databkp = data.copy()
         return kde_result
