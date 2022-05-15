@@ -337,13 +337,16 @@ class newtonRapson(object):
             sum += self.__multivariateGaussian(self.__listDivision(self.__listSubtraction(x, data[i]), h))
         return (sum/(len(data)*h**self.__ndim(x)))
 
-    def maximumLikelihoodEstimation(self, data, h): #TODO adicionar o if de data ser multidimensional
+    def maximumLikelihoodEstimation(self, data, h):
         auxVar = [None] * len(data)
         databkp = data.copy()
         for i in range(len(data)):
             element = databkp[i]
             databkp.pop(i)
-            auxVar[i] = math.log(self.kernelDensityEstimation(element, databkp, h))
+            if isinstance(element, float):
+                auxVar[i] = math.log(self.kernelDensityEstimation(element, databkp, h))
+            else:
+                auxVar[i] = math.log(self.multivariateKernelDensityEstimation(element, databkp, h))
             databkp.clear()
             databkp = data.copy()
         return (sum(auxVar))
