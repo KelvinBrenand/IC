@@ -337,7 +337,7 @@ class newtonRapson(object):
             sum += self.__multivariateGaussian(self.__listDivision(self.__listSubtraction(x, data[i]), h))
         return (sum/(len(data)*h**self.__ndim(x)))
 
-    def maximumLikelihoodEstimation(self, data, h): #virou uma função de fazer Leave-One-Out, basicamente.
+    def LOO_Kde(self, data, h): #virou uma função de fazer Leave-One-Out, basicamente.
         auxVar = [None] * len(data)
         databkp = data.copy()
         for i in range(len(data)):
@@ -350,3 +350,31 @@ class newtonRapson(object):
             databkp.clear()
             databkp = data.copy()
         return auxVar
+
+    def __column(self, matrix, i):
+        return [row[i] for row in matrix]
+
+    def MLE(self,data):
+        MIN = 0.4
+        initial_h = 1.0
+        auxVar = 1.0
+        auxList1 = []
+        auxList2 = []
+        for i in range (len(data[0])): #Recebe lista de listas. Significa o numero de colunas
+            while(True):
+                h = self.newtonRaphson(self.__column(data, i), initial_h)
+                initial_h -= 0.1
+                if not isinstance(h, str) and h != None and h > 0:
+                    initial_h = 1.0
+                    break
+                if initial_h <= MIN:
+                    print("Erro no newtonRaphson")
+                    return None
+            auxList1.append(self.LOO_Kde(self.__column(data, i), h))
+
+        for i in range(len(auxList1[0])):
+            for j in range(len(auxList1)):
+                auxVar = auxVar*auxList1[j][i]
+            auxList2.append(math.log(auxVar))
+            auxVar = 1.0
+        return sum(auxList2)
