@@ -354,13 +354,29 @@ class newtonRapson(object):
     def __column(self, matrix, i):
         return [row[i] for row in matrix]
 
+    def __pairs(self, n):
+        c = []
+        for i in range(n):
+            for j in range(i+1, n):
+                c.append([i,j])
+        return c
+    
+    def __list2a2(self, data,index):
+        e = []
+        for i in range(len(data)):
+            e.append([data[i][index[0]],data[i][index[1]]])
+        return e
+
     def MLE(self,data):
         MIN = 0.4
         initial_h = 1.0
         auxVar = 1.0
-        auxList1 = []
-        auxList2 = []
-        for i in range (len(data[0])): #Recebe lista de listas. Significa o numero de colunas
+        pfeaturesKDE = []
+        auxList = []
+        p2a2KDE = []
+        initial_adjacency_matrix = [[0 for i in range(len(data[0]))]]*len(data[0])
+        adjacency_matrix = initial_adjacency_matrix
+        for i in range (len(data[0])): #Recebe lista de listas. Argumento significa o numero de colunas
             while(True):
                 h = self.newtonRaphson(self.__column(data, i), initial_h)
                 initial_h -= 0.1
@@ -370,11 +386,47 @@ class newtonRapson(object):
                 if initial_h <= MIN:
                     print("Erro no newtonRaphson")
                     return None
-            auxList1.append(self.LOO_Kde(self.__column(data, i), h))
+            pfeaturesKDE.append(self.LOO_Kde(self.__column(data, i), h))
 
-        for i in range(len(auxList1[0])):
-            for j in range(len(auxList1)):
-                auxVar = auxVar*auxList1[j][i]
-            auxList2.append(math.log(auxVar))
+        for i in range(len(pfeaturesKDE[0])):
+            for j in range(len(pfeaturesKDE)):
+                auxVar = auxVar*pfeaturesKDE[j][i]
+            auxList.append(math.log(auxVar))
             auxVar = 1.0
-        return sum(auxList2)
+        last_MLE = sum(auxList)
+
+        indices = self.__pairs(len(data[0]))
+        for elem in indices:
+            myList2a2 = self.__list2a2(data, elem)
+            while(True):
+                h = self.multivariateNewtonRaphson(myList2a2, initial_h)
+                initial_h -= 0.1
+                if not isinstance(h, str) and h != None and h > 0:
+                    initial_h = 1.0
+                    break
+                if initial_h <= MIN:
+                    print("Erro no multivariateNewtonRaphson")
+                    return None
+            p2a2KDE.append(self.LOO_Kde(myList2a2, h))
+
+            auxList2 = []
+            auxList3 = []
+            auxVarRange = [x for x in range(len(pfeaturesKDE))]
+            auxVarRange.pop(elem[1])
+            auxVarRange.pop(elem[0])
+            for i in range(len(p2a2KDE[-1])):
+                auxVar2 = p2a2KDE[-1][i]/pfeaturesKDE[elem[0]][i]
+                auxVar3 = p2a2KDE[-1][i]/pfeaturesKDE[elem[1]][i]
+                for j in auxVarRange:
+                    auxVar2 = auxVar2*pfeaturesKDE[j][i]
+                    auxVar3 = auxVar3*pfeaturesKDE[j][i]
+                auxList2.append(math.log(auxVar2))
+                auxList3.append(math.log(auxVar3))
+            auxVar4 = sum(auxList2)
+            auxVar5 = sum(auxList3)
+            if auxVar4 > last_MLE or auxVar5 > last_MLE:
+                if auxVar4 > auxVar5: #TODO fazer função de alterar a matrix. TODO setar a matrix apos cada rodada de arcos
+                    pass
+                else:
+                    pass
+        return adjacency_matrix
