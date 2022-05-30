@@ -419,22 +419,26 @@ class newtonRapson(object):
 
             auxList2 = []
             auxList3 = []
-            auxVarRange = [x for x in range(len(pfeaturesKDE))]
-            auxVarRange.pop(elem[1])
-            auxVarRange.pop(elem[0])
             for i in range(len(p2a2KDE[-1])):
                 auxVar2 = p2a2KDE[-1][i]/pfeaturesKDE[elem[0]][i]
                 auxVar3 = p2a2KDE[-1][i]/pfeaturesKDE[elem[1]][i]
+                auxVarRange = [x for x in range(len(pfeaturesKDE))]
+                auxVarRange.pop(elem[1])
                 for j in auxVarRange:
-                    auxVar2 = auxVar2*pfeaturesKDE[j][i]
-                    auxVar3 = auxVar3*pfeaturesKDE[j][i]
+                    auxVar2 = auxVar2*pfeaturesKDE[elem[1]][j]
                 auxList2.append(math.log(auxVar2))
+                auxVarRange = [x for x in range(len(pfeaturesKDE))]
+                auxVarRange.pop(elem[0])
+                for j in auxVarRange:
+                    auxVar3 = auxVar3*pfeaturesKDE[elem[0]][j]
                 auxList3.append(math.log(auxVar3))
             auxVar4 = sum(auxList2)
             auxVar5 = sum(auxList3)
             if auxVar4 > last_MLE or auxVar5 > last_MLE:
                 if auxVar4 > auxVar5: #TODO setar a matrix apos cada rodada de arcos
+                    last_MLE = auxVar4
                     adjacency_matrix = self.__mtxMod(adjacency_matrix,elem, elem[0])
                 else:
+                    last_MLE = auxVar5
                     adjacency_matrix = self.__mtxMod(adjacency_matrix,elem, elem[1])
         return adjacency_matrix
