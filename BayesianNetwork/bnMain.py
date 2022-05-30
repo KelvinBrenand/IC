@@ -8,7 +8,7 @@ data1 = data.data[:,:2].tolist()
 print(np.array(data1).shape)
 obj = newtonRapson()
 X = obj.MLE(data1)
-print(X)
+print(np.array(X))
 #print("MLE Independente: "+str(round(X[0], 2)))
 
 # X1 = data.data[:, :1].tolist()

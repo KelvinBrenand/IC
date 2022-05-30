@@ -367,6 +367,14 @@ class newtonRapson(object):
             e.append([data[i][index[0]],data[i][index[1]]])
         return e
 
+
+    def __mtxMod(self, mtx, idx, intg):
+        if intg == idx[0]:
+            mtx[idx[1]][idx[0]] = 1
+        else:
+            mtx[idx[0]][idx[1]] = 1
+        return mtx
+
     def MLE(self,data):
         MIN = 0.4
         initial_h = 1.0
@@ -374,7 +382,7 @@ class newtonRapson(object):
         pfeaturesKDE = []
         auxList = []
         p2a2KDE = []
-        initial_adjacency_matrix = [[0 for i in range(len(data[0]))]]*len(data[0])
+        initial_adjacency_matrix = [[0 for i in range(len(data[0]))] for n in range(len(data[0]))]
         adjacency_matrix = initial_adjacency_matrix
         for i in range (len(data[0])): #Recebe lista de listas. Argumento significa o numero de colunas
             while(True):
@@ -425,8 +433,8 @@ class newtonRapson(object):
             auxVar4 = sum(auxList2)
             auxVar5 = sum(auxList3)
             if auxVar4 > last_MLE or auxVar5 > last_MLE:
-                if auxVar4 > auxVar5: #TODO fazer função de alterar a matrix. TODO setar a matrix apos cada rodada de arcos
-                    pass
+                if auxVar4 > auxVar5: #TODO setar a matrix apos cada rodada de arcos
+                    adjacency_matrix = self.__mtxMod(adjacency_matrix,elem, elem[0])
                 else:
-                    pass
+                    adjacency_matrix = self.__mtxMod(adjacency_matrix,elem, elem[1])
         return adjacency_matrix
