@@ -423,14 +423,14 @@ class newtonRapson(object):
                 auxVar2 = p2a2KDE[-1][i]/pfeaturesKDE[elem[0]][i]
                 auxVar3 = p2a2KDE[-1][i]/pfeaturesKDE[elem[1]][i]
                 auxVarRange = [x for x in range(len(pfeaturesKDE))]
-                auxVarRange.pop(elem[1])
+                auxVarRange.remove(elem[0])
                 for j in auxVarRange:
-                    auxVar2 = auxVar2*pfeaturesKDE[elem[1]][j]
+                    auxVar2 = auxVar2*pfeaturesKDE[j][i]
                 auxList2.append(math.log(auxVar2))
                 auxVarRange = [x for x in range(len(pfeaturesKDE))]
-                auxVarRange.pop(elem[0])
+                auxVarRange.remove(elem[1])
                 for j in auxVarRange:
-                    auxVar3 = auxVar3*pfeaturesKDE[elem[0]][j]
+                    auxVar3 = auxVar3*pfeaturesKDE[j][i]
                 auxList3.append(math.log(auxVar3))
             auxVar4 = sum(auxList2)
             auxVar5 = sum(auxList3)
