@@ -1,6 +1,7 @@
 # Author: Kelvin Brenand <brenand.kelvin@gmail.com>
 
 import math
+import copy
 
 class newtonRapson(object):
     '''
@@ -383,7 +384,7 @@ class newtonRapson(object):
         auxList = []
         p2a2KDE = []
         initial_adjacency_matrix = [[0 for i in range(len(data[0]))] for n in range(len(data[0]))]
-        adjacency_matrix = initial_adjacency_matrix
+        adjacency_matrix = []
         for i in range (len(data[0])): #Recebe lista de listas. Argumento significa o numero de colunas
             while(True):
                 h = self.newtonRaphson(self.__column(data, i), initial_h)
@@ -437,8 +438,10 @@ class newtonRapson(object):
             if auxVar4 > last_MLE or auxVar5 > last_MLE:
                 if auxVar4 > auxVar5: #TODO setar a matrix apos cada rodada de arcos
                     last_MLE = auxVar4
+                    adjacency_matrix = copy.deepcopy(initial_adjacency_matrix)
                     adjacency_matrix = self.__mtxMod(adjacency_matrix,elem, elem[0])
                 else:
                     last_MLE = auxVar5
+                    adjacency_matrix = copy.deepcopy(initial_adjacency_matrix)
                     adjacency_matrix = self.__mtxMod(adjacency_matrix,elem, elem[1])
         return adjacency_matrix
