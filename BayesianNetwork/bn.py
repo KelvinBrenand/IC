@@ -199,6 +199,14 @@ class newtonRapson(object):
         Returns:
             list or float: If A and B are both 1D, it returns the resulting float of the inner product. If B is 2D, it returns the resulting list of the sum product.
         """
+        if isinstance(A, list) and isinstance(B, list) and len(A) == len(B):
+            if isinstance(A[0], list) and isinstance(B[0], list) and len(A[0]) == len(B[0]):
+                result = [[0 for i in range(len(A[0]))] for n in range(len(A[0]))]
+                for i in range(len(A)):
+                    for j in range(len(B[0])):
+                        for k in range(len(B)):
+                            result[i][j] += A[i][k] * B[k][j]
+                return result
         try:
             auxVar = len(B[0])
             result = [0.] * len(A)
@@ -359,7 +367,7 @@ class newtonRapson(object):
         c = []
         for i in range(n):
             for j in range(i+1, n):
-                c.append([i,j])
+                c.append((i,j))
         return c
     
     def __list2a2(self, data,index):
@@ -369,23 +377,29 @@ class newtonRapson(object):
         return e
 
 
-    def __mtxMod(self, mtx, idx, intg):
-        if intg == idx[0]:
-            mtx[idx[1]][idx[0]] = 1
-        else:
-            mtx[idx[0]][idx[1]] = 1
+    def __mtxModifier(self, mtx, idx):
+        mtx[idx[0]][idx[1]] = 1
         return mtx
+
+    def __trace(self, matrix):
+        return sum(matrix[i][i] for i in range(len(matrix[0])))
+    
+    def __cycle(self, matrix):
+        An = matrix
+        for i in range(1,len(matrix[0])):
+            An = self.__dot(An, matrix)
+            if self.__trace(An) != 0:
+                return True
+        return False
 
     def MLE(self,data):
         MIN = 0.4
         initial_h = 1.0
         auxVar = 1.0
-        pfeaturesKDE = []
-        auxList = []
-        p2a2KDE = []
+        probs = {}
         initial_adjacency_matrix = [[0 for i in range(len(data[0]))] for n in range(len(data[0]))]
         adjacency_matrix = []
-        for i in range (len(data[0])): #Recebe lista de listas. Argumento significa o numero de colunas
+        for i in range (len(data[0])):
             while(True):
                 h = self.newtonRaphson(self.__column(data, i), initial_h)
                 initial_h -= 0.1
@@ -393,13 +407,14 @@ class newtonRapson(object):
                     initial_h = 1.0
                     break
                 if initial_h <= MIN:
-                    print("Erro no newtonRaphson")
+                    print("NewtonRaphson não convergiu")
                     return None
-            pfeaturesKDE.append(self.LOO_Kde(self.__column(data, i), h))
+            probs.update({(i):self.LOO_Kde(self.__column(data, i), h)})
 
-        for i in range(len(pfeaturesKDE[0])):
-            for j in range(len(pfeaturesKDE)):
-                auxVar = auxVar*pfeaturesKDE[j][i]
+        auxList = []
+        for i in range(len(probs.get((0)))):
+            for j in range(len(probs)):
+                auxVar = auxVar*probs.get((j))[i]
             auxList.append(math.log(auxVar))
             auxVar = 1.0
         last_MLE = sum(auxList)
@@ -414,34 +429,41 @@ class newtonRapson(object):
                     initial_h = 1.0
                     break
                 if initial_h <= MIN:
-                    print("Erro no multivariateNewtonRaphson")
+                    print("MultivariateNewtonRaphson não convergiu")
                     return None
-            p2a2KDE.append(self.LOO_Kde(myList2a2, h))
+            probs.update({elem:self.LOO_Kde(myList2a2, h)})
 
+            arcIdx = []
             auxList2 = []
             auxList3 = []
-            for i in range(len(p2a2KDE[-1])):
-                auxVar2 = p2a2KDE[-1][i]/pfeaturesKDE[elem[0]][i]
-                auxVar3 = p2a2KDE[-1][i]/pfeaturesKDE[elem[1]][i]
-                auxVarRange = [x for x in range(len(pfeaturesKDE))]
+            for i in range(len(probs.get(elem))):
+                auxVar2 = probs.get(elem)[i]/probs.get((elem[0]))[i]
+                auxVar3 = probs.get(elem)[i]/probs.get((elem[1]))[i]
+                auxVarRange = [x for x in range(len(data[0]))]
                 auxVarRange.remove(elem[1])
                 for j in auxVarRange:
-                    auxVar2 = auxVar2*pfeaturesKDE[j][i]
+                    auxVar2 = auxVar2*probs.get((j))[i]
                 auxList2.append(math.log(auxVar2))
-                auxVarRange = [x for x in range(len(pfeaturesKDE))]
+                auxVarRange = [x for x in range(len(data[0]))]
                 auxVarRange.remove(elem[0])
                 for j in auxVarRange:
-                    auxVar3 = auxVar3*pfeaturesKDE[j][i]
+                    auxVar3 = auxVar3*probs.get((j))[i]
                 auxList3.append(math.log(auxVar3))
             auxVar4 = sum(auxList2)
             auxVar5 = sum(auxList3)
             if auxVar4 > last_MLE or auxVar5 > last_MLE:
-                if auxVar4 > auxVar5: #TODO setar a matrix apos cada rodada de arcos
+                adjacency_matrix = copy.deepcopy(initial_adjacency_matrix)
+                if auxVar4 > auxVar5:
+                    arcIdx = [elem[1],elem[0]]
                     last_MLE = auxVar4
-                    adjacency_matrix = copy.deepcopy(initial_adjacency_matrix)
-                    adjacency_matrix = self.__mtxMod(adjacency_matrix,elem, elem[0])
                 else:
+                    arcIdx = list(elem)
                     last_MLE = auxVar5
-                    adjacency_matrix = copy.deepcopy(initial_adjacency_matrix)
-                    adjacency_matrix = self.__mtxMod(adjacency_matrix,elem, elem[1])
+                adjacency_matrix = self.__mtxModifier(adjacency_matrix,arcIdx)
+        
+        # arcIdx.sort()
+        # indices.remove(tuple(arcIdx))
+        # for elem in indices: #TODO adicionar proximos arcos, dado o primeiro
+        #     #if elem[0] == arcIdx
+        #     pass
         return adjacency_matrix
