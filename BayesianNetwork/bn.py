@@ -370,10 +370,13 @@ class newtonRapson(object):
                 c.append((i,j))
         return c
     
-    def __list2a2(self, data,index):
+    def __dataPartition(data,index):
         e = []
         for i in range(len(data)):
-            e.append([data[i][index[0]],data[i][index[1]]])
+            f = []
+            for j in index:
+                f.append(data[i][index[j]])
+            e.append(f)
         return e
 
 
@@ -421,9 +424,9 @@ class newtonRapson(object):
 
         indices = self.__pairs(len(data[0]))
         for elem in indices:
-            myList2a2 = self.__list2a2(data, elem)
+            myData = self.__dataPartition(data, elem)
             while(True):
-                h = self.multivariateNewtonRaphson(myList2a2, initial_h)
+                h = self.multivariateNewtonRaphson(myData, initial_h)
                 initial_h -= 0.1
                 if not isinstance(h, str) and h != None and h > 0:
                     initial_h = 1.0
@@ -431,7 +434,7 @@ class newtonRapson(object):
                 if initial_h <= MIN:
                     print("MultivariateNewtonRaphson não convergiu")
                     return None
-            probs.update({elem:self.LOO_Kde(myList2a2, h)})
+            probs.update({elem:self.LOO_Kde(myData, h)})
 
             arcIdx = []
             auxList2 = []
@@ -461,9 +464,23 @@ class newtonRapson(object):
                     last_MLE = auxVar5
                 adjacency_matrix = self.__mtxModifier(adjacency_matrix,arcIdx)
         
-        # arcIdx.sort()
-        # indices.remove(tuple(arcIdx))
-        # for elem in indices: #TODO adicionar proximos arcos, dado o primeiro
-        #     #if elem[0] == arcIdx
-        #     pass
+        arcAux = arcIdx.copy()
+        arcAux.sort()
+        indices.remove(tuple(arcAux))
+        for elem in indices: #TODO adicionar proximos arcos, dado o primeiro
+            if elem[0] == arcIdx[1]:
+                c = [elem[0], elem[1], arcIdx[0]]
+                c.sort()
+                myData = self.__dataPartition(data, c)
+                while(True):
+                    h = self.multivariateNewtonRaphson(myData, initial_h)
+                    initial_h -= 0.1
+                    if not isinstance(h, str) and h != None and h > 0:
+                        initial_h = 1.0
+                        break
+                    if initial_h <= MIN:
+                        print("MultivariateNewtonRaphson não convergiu")
+                        return None
+                probs.update({c:self.LOO_Kde(myData, h)})
+            pass
         return adjacency_matrix
