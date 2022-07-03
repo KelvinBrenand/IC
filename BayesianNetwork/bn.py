@@ -402,7 +402,7 @@ class newtonRapson(object):
         probs = {}
         initial_adjacency_matrix = [[0 for i in range(len(data[0]))] for n in range(len(data[0]))]
         adjacency_matrix = []
-        for i in range (len(data[0])):
+        for i in range (len(data[0])): #Inicio do código do MLE independente
             while(True):
                 h = self.newtonRaphson(self.__column(data, i), initial_h)
                 initial_h -= 0.1
@@ -422,7 +422,7 @@ class newtonRapson(object):
             auxVar = 1.0
         last_MLE = sum(auxList)
 
-        indices = self.__pairs(len(data[0]))
+        indices = self.__pairs(len(data[0])) #Inicio do código do primeiro arco
         for elem in indices:
             myData = self.__dataPartition(data, elem)
             while(True):
@@ -437,37 +437,26 @@ class newtonRapson(object):
             probs.update({elem:self.LOO_Kde(myData, h)})
 
             arcIdx = []
-            auxList2 = []
-            auxList3 = []
+            auxList = []
             for i in range(len(probs.get(elem))):
-                auxVar2 = probs.get(elem)[i]/probs.get((elem[0]))[i]
-                auxVar3 = probs.get(elem)[i]/probs.get((elem[1]))[i]
+                auxVar2 = probs.get(elem)[i]
                 auxVarRange = [x for x in range(len(data[0]))]
                 auxVarRange.remove(elem[1])
                 for j in auxVarRange:
                     auxVar2 = auxVar2*probs.get((j))[i]
-                auxList2.append(math.log(auxVar2))
-                auxVarRange = [x for x in range(len(data[0]))]
-                auxVarRange.remove(elem[0])
-                for j in auxVarRange:
-                    auxVar3 = auxVar3*probs.get((j))[i]
-                auxList3.append(math.log(auxVar3))
-            auxVar4 = sum(auxList2)
-            auxVar5 = sum(auxList3)
-            if auxVar4 > last_MLE or auxVar5 > last_MLE:
+                auxList.append(math.log(auxVar2))
+            auxVar4 = sum(auxList)
+            if auxVar4 > last_MLE:
+                last_MLE = auxVar4
+                arcIdx = list(elem)
                 adjacency_matrix = copy.deepcopy(initial_adjacency_matrix)
-                if auxVar4 > auxVar5:
-                    arcIdx = [elem[1],elem[0]]
-                    last_MLE = auxVar4
-                else:
-                    arcIdx = list(elem)
-                    last_MLE = auxVar5
                 adjacency_matrix = self.__mtxModifier(adjacency_matrix,arcIdx)
         
-        arcAux = arcIdx.copy()
+        arcAux = arcIdx.copy() #Inicio do código do segundo arco
         arcAux.sort()
         indices.remove(tuple(arcAux))
-        for elem in indices: #TODO adicionar proximos arcos, dado o primeiro
+        melhorSegundoArco = []
+        for elem in indices: #Primeiro caso.
             if elem[0] == arcIdx[1]:
                 c = [elem[0], elem[1], arcIdx[0]]
                 c.sort()
@@ -481,6 +470,22 @@ class newtonRapson(object):
                     if initial_h <= MIN:
                         print("MultivariateNewtonRaphson não convergiu")
                         return None
-                probs.update({c:self.LOO_Kde(myData, h)})
-            pass
+                kde_numerador = self.LOO_Kde(myData, h)
+                myData = self.__dataPartition(data, arcIdx)
+                while(True):
+                    h = self.multivariateNewtonRaphson(myData, initial_h)
+                    initial_h -= 0.1
+                    if not isinstance(h, str) and h != None and h > 0:
+                        initial_h = 1.0
+                        break
+                    if initial_h <= MIN:
+                        print("MultivariateNewtonRaphson não convergiu")
+                        return None
+                kde_denominador = self.LOO_Kde(myData, h)
+                for i in range(len(kde_numerador)):
+                    auxVar5 = kde_numerador[i]/kde_denominador[i]
+                secArcCaseOne = sum(math.log(auxVar5))*last_MLE
+                if secArcCaseOne > last_MLE:
+                    last_MLE = secArcCaseOne
+                    melhorSegundoArco = list(elem)
         return adjacency_matrix
