@@ -88,15 +88,23 @@ class newtonRapson(object):
         funcReturn = self.__fracResult(data, best_h)
         frac = funcReturn[0]/funcReturn[1]
         count = 0
-        while abs(frac) >= epsilon:
-            funcReturn = self.__fracResult(data, best_h)
-            if funcReturn[1] == 0:
-                return None
-            frac = funcReturn[0]/funcReturn[1]
-            best_h = best_h - frac
-            count = count+1
-            if count >= max_iter:
-                return None
+        result = None
+        MIN_H_VALUE = 0.4
+        while result == None and best_h >= MIN_H_VALUE:
+            while abs(frac) >= epsilon:
+                funcReturn = self.__fracResult(data, best_h)
+                if funcReturn[1] == 0:
+                    result = None
+                    break
+                frac = funcReturn[0]/funcReturn[1]
+                best_h = best_h - frac
+                count = count+1
+                if count >= max_iter:
+                    result = None
+                    break
+            best_h = h-0.1
+        if best_h < MIN_H_VALUE-0.1:
+            print("Erro no newtonRaphson")
         return best_h
     
     def kernelDensityEstimation(self, x, data, h):
@@ -304,15 +312,23 @@ class newtonRapson(object):
         funcReturn = self.__multivariateFracResult(data, best_h)
         frac = funcReturn[0]/funcReturn[1]
         count = 0
-        while abs(frac) >= epsilon:
-            funcReturn = self.__multivariateFracResult(data, best_h)
-            if funcReturn[1] == 0:
-                return None
-            frac = funcReturn[0]/funcReturn[1]
-            best_h = best_h - frac
-            count = count+1
-            if count >= max_iter:
-                return None
+        result = None
+        MIN_H_VALUE = 0.4
+        while result == None and best_h >= MIN_H_VALUE:
+            while abs(frac) >= epsilon:
+                funcReturn = self.__multivariateFracResult(data, best_h)
+                if funcReturn[1] == 0:
+                    result = None
+                    break
+                frac = funcReturn[0]/funcReturn[1]
+                best_h = best_h - frac
+                count = count+1
+                if count >= max_iter:
+                    result = None
+                    break
+            best_h = h-0.1
+        if best_h < MIN_H_VALUE-0.1:
+            print("Erro no multivariateNewtonRaphson")
         return best_h
 
     def multivariateKernelDensityEstimation(self, x, data, h):
@@ -346,7 +362,7 @@ class newtonRapson(object):
             sum += self.__multivariateGaussian(self.__listDivision(self.__listSubtraction(x, data[i]), h))
         return (sum/(len(data)*h**self.__ndim(x)))
 
-    def LOO_Kde(self, data, h): #virou uma função de fazer Leave-One-Out, basicamente.
+    def LOO_Kde(self, data, h):
         auxVar = [None] * len(data)
         databkp = data.copy()
         for i in range(len(data)):
@@ -396,22 +412,13 @@ class newtonRapson(object):
         return False
 
     def MLE(self,data):
-        MIN = 0.4
         initial_h = 1.0
         auxVar = 1.0
         probs = {}
         initial_adjacency_matrix = [[0 for i in range(len(data[0]))] for n in range(len(data[0]))]
         adjacency_matrix = []
         for i in range (len(data[0])): #Inicio do código do MLE independente
-            while(True):
-                h = self.newtonRaphson(self.__column(data, i), initial_h)
-                initial_h -= 0.1
-                if not isinstance(h, str) and h != None and h > 0:
-                    initial_h = 1.0
-                    break
-                if initial_h <= MIN:
-                    print("NewtonRaphson não convergiu")
-                    return None
+            h = self.newtonRaphson(self.__column(data, i), initial_h)
             probs.update({(i):self.LOO_Kde(self.__column(data, i), h)})
 
         auxList = []
@@ -425,21 +432,14 @@ class newtonRapson(object):
         indices = self.__pairs(len(data[0])) #Inicio do código do primeiro arco
         for elem in indices:
             myData = self.__dataPartition(data, elem)
-            while(True):
-                h = self.multivariateNewtonRaphson(myData, initial_h)
-                initial_h -= 0.1
-                if not isinstance(h, str) and h != None and h > 0:
-                    initial_h = 1.0
-                    break
-                if initial_h <= MIN:
-                    print("MultivariateNewtonRaphson não convergiu")
-                    return None
-            probs.update({elem:self.LOO_Kde(myData, h)})
+            h = self.multivariateNewtonRaphson(myData, initial_h)
+            arc_Kde = self.LOO_Kde(myData, h)
+            bestFirstArc = []
 
             arcIdx = []
             auxList = []
-            for i in range(len(probs.get(elem))):
-                auxVar2 = probs.get(elem)[i]
+            for i in range(len(arc_Kde)):
+                auxVar2 = arc_Kde[i]
                 auxVarRange = [x for x in range(len(data[0]))]
                 auxVarRange.remove(elem[1])
                 for j in auxVarRange:
@@ -449,8 +449,10 @@ class newtonRapson(object):
             if auxVar4 > last_MLE:
                 last_MLE = auxVar4
                 arcIdx = list(elem)
-                adjacency_matrix = copy.deepcopy(initial_adjacency_matrix)
-                adjacency_matrix = self.__mtxModifier(adjacency_matrix,arcIdx)
+                bestFirstArc = arc_Kde
+        adjacency_matrix = copy.deepcopy(initial_adjacency_matrix)
+        adjacency_matrix = self.__mtxModifier(adjacency_matrix,arcIdx)
+        probs.update({"1arc": bestFirstArc})
         
         arcAux = arcIdx.copy() #Inicio do código do segundo arco
         arcAux.sort()
@@ -461,27 +463,12 @@ class newtonRapson(object):
                 c = [elem[0], elem[1], arcIdx[0]]
                 c.sort()
                 myData = self.__dataPartition(data, c)
-                while(True):
-                    h = self.multivariateNewtonRaphson(myData, initial_h)
-                    initial_h -= 0.1
-                    if not isinstance(h, str) and h != None and h > 0:
-                        initial_h = 1.0
-                        break
-                    if initial_h <= MIN:
-                        print("MultivariateNewtonRaphson não convergiu")
-                        return None
+                h = self.multivariateNewtonRaphson(myData, initial_h)
                 kde_numerador = self.LOO_Kde(myData, h)
                 myData = self.__dataPartition(data, arcIdx)
-                while(True):
-                    h = self.multivariateNewtonRaphson(myData, initial_h)
-                    initial_h -= 0.1
-                    if not isinstance(h, str) and h != None and h > 0:
-                        initial_h = 1.0
-                        break
-                    if initial_h <= MIN:
-                        print("MultivariateNewtonRaphson não convergiu")
-                        return None
+                h = self.multivariateNewtonRaphson(myData, initial_h)
                 kde_denominador = self.LOO_Kde(myData, h)
+
                 for i in range(len(kde_numerador)):
                     auxVar5 = kde_numerador[i]/kde_denominador[i]
                 secArcCaseOne = sum(math.log(auxVar5))*last_MLE
