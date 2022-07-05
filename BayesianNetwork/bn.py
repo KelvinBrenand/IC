@@ -500,9 +500,31 @@ class newtonRapson(object):
                 auxVarRange.remove(elem[0])
                 auxVarRange.remove(elem[1])
                 for j in auxVarRange:
-                    auxVa6 = auxVar6*probs.get((j))[i]
+                    auxVar6 = auxVar6*probs.get((j))[i]
                 secArcCaseTwo = sum(math.log(auxVar6))
                 if secArcCaseTwo > last_MLE:
                     last_MLE = secArcCaseTwo
+                    melhorSegundoArco = list(elem)
+            
+            secArcCaseThreeArray = [] #Início do terceiro caso
+            for i in range(len(adjacency_matrix[0])):
+                if adjacency_matrix[i][elem[1]] == 1:
+                    secArcCaseTwoArray.append(i)
+
+            if secArcCaseThreeArray != []:
+                myData = self.__dataPartition(data, elem)
+                h = self.multivariateNewtonRaphson(myData, initial_h)
+                arc_Kde = self.LOO_Kde(myData, h)
+                for i in range(len(arc_Kde)):
+                    auxVar7 = arc_Kde[i]+probs.get("1arc")[i]
+                auxVarRange = [x for x in range(len(data[0]))]
+                for i in secArcCaseThreeArray:
+                    auxVarRange.remove(i)
+                auxVarRange.remove(elem[1])
+                for j in auxVarRange:
+                    auxVar7 = auxVar7*probs.get((j))[i]
+                secArcCaseThree = sum(math.log(auxVar6))
+                if secArcCaseThree > last_MLE:
+                    last_MLE = secArcCaseThree
                     melhorSegundoArco = list(elem)
         return adjacency_matrix #TODO atualizar a matrix de adjacencia no fim da adição do segundo arco.
