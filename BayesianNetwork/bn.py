@@ -563,5 +563,6 @@ class newtonRapson(object):
                     last_MLE = secArcCaseFive
                     melhorSegundoArco = list(elem)
         
-        adjacency_matrix = self.__mtxModifier(adjacency_matrix,melhorSegundoArco)
+        if indices != [] and melhorSegundoArco !=[]:
+            adjacency_matrix = self.__mtxModifier(adjacency_matrix,melhorSegundoArco)
         return adjacency_matrix
