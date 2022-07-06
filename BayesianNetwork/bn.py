@@ -84,27 +84,32 @@ class newtonRapson(object):
         if epsilon <= 0.0:
             return "EXIT_FAIL_INVALID_EPISILON"
 
+        MIN_H_VALUE = 0.4
+        count = 0
         best_h = h
         funcReturn = self.__fracResult(data, best_h)
         frac = funcReturn[0]/funcReturn[1]
-        count = 0
-        result = None
-        MIN_H_VALUE = 0.4
-        while result == None and best_h >= MIN_H_VALUE:
+        while True:
             while abs(frac) >= epsilon:
                 funcReturn = self.__fracResult(data, best_h)
                 if funcReturn[1] == 0:
-                    result = None
+                    best_h = None
                     break
                 frac = funcReturn[0]/funcReturn[1]
                 best_h = best_h - frac
                 count = count+1
                 if count >= max_iter:
-                    result = None
+                    best_h = None
+                    count = 0
                     break
-            best_h = h-0.1
-        if best_h < MIN_H_VALUE-0.1:
-            print("Erro no newtonRaphson")
+            if best_h == None or best_h < 0:
+                h = h-0.1
+                best_h = h
+                if best_h < MIN_H_VALUE:
+                    print("Erro no newtonRaphson")
+                    break
+            else:
+                break
         return best_h
     
     def kernelDensityEstimation(self, x, data, h):
@@ -308,27 +313,32 @@ class newtonRapson(object):
         if epsilon <= 0.0:
             return "EXIT_FAIL_INVALID_EPISILON"
 
+        MIN_H_VALUE = 0.4
+        count = 0
         best_h = h
         funcReturn = self.__multivariateFracResult(data, best_h)
         frac = funcReturn[0]/funcReturn[1]
-        count = 0
-        result = None
-        MIN_H_VALUE = 0.4
-        while result == None and best_h >= MIN_H_VALUE:
+        while True:
             while abs(frac) >= epsilon:
                 funcReturn = self.__multivariateFracResult(data, best_h)
                 if funcReturn[1] == 0:
-                    result = None
+                    best_h = None
                     break
                 frac = funcReturn[0]/funcReturn[1]
                 best_h = best_h - frac
                 count = count+1
                 if count >= max_iter:
-                    result = None
+                    best_h = None
+                    count = 0
                     break
-            best_h = h-0.1
-        if best_h < MIN_H_VALUE-0.1:
-            print("Erro no multivariateNewtonRaphson")
+            if best_h == None or best_h < 0:
+                h = h-0.1
+                best_h = h
+                if best_h < MIN_H_VALUE:
+                    print("Erro no multivariateNewtonRaphson")
+                    break
+            else:
+                break
         return best_h
 
     def multivariateKernelDensityEstimation(self, x, data, h):
@@ -386,7 +396,7 @@ class newtonRapson(object):
                 c.append((i,j))
         return c
     
-    def __dataPartition(data,index):
+    def __dataPartition(self,data,index):
         e = []
         for i in range(len(data)):
             f = []
@@ -420,15 +430,14 @@ class newtonRapson(object):
         for i in range (len(data[0])): #Inicio do código do MLE independente
             h = self.newtonRaphson(self.__column(data, i), initial_h)
             probs.update({(i):self.LOO_Kde(self.__column(data, i), h)})
-
         auxList = []
+        
         for i in range(len(probs.get((0)))):
             for j in range(len(probs)):
                 auxVar = auxVar*probs.get((j))[i]
             auxList.append(math.log(auxVar))
             auxVar = 1.0
         last_MLE = sum(auxList)
-
         indices = self.__pairs(len(data[0])) #Inicio do código do primeiro arco
         for elem in indices:
             myData = self.__dataPartition(data, elem)
