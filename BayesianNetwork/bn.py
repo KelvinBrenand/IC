@@ -401,7 +401,7 @@ class newtonRapson(object):
         for i in range(len(data)):
             f = []
             for j in index:
-                f.append(data[i][index[j]])
+                f.append(data[i][j])
             e.append(f)
         return e
 
@@ -438,131 +438,165 @@ class newtonRapson(object):
             auxList.append(math.log(auxVar))
             auxVar = 1.0
         last_MLE = sum(auxList)
+        print(last_MLE)
+
         indices = self.__pairs(len(data[0])) #Inicio do código do primeiro arco
+        arcIdx = []
         for elem in indices:
             myData = self.__dataPartition(data, elem)
             h = self.multivariateNewtonRaphson(myData, initial_h)
             arc_Kde = self.LOO_Kde(myData, h)
             bestFirstArc = []
 
-            arcIdx = []
             auxList = []
+            auxVarRange = [x for x in range(len(data[0]))]
+            auxVarRange.remove(elem[0])
+            auxVarRange.remove(elem[1])
             for i in range(len(arc_Kde)):
-                auxVar2 = arc_Kde[i]
-                auxVarRange = [x for x in range(len(data[0]))]
-                auxVarRange.remove(elem[0])
-                auxVarRange.remove(elem[1])
+                auxVar = arc_Kde[i]
                 for j in auxVarRange:
-                    auxVar2 = auxVar2*probs.get((j))[i]
-                auxList.append(math.log(auxVar2))
-            auxVar4 = sum(auxList)
-            if auxVar4 > last_MLE:
-                last_MLE = auxVar4
+                    auxVar = auxVar*probs.get((j))[i]
+                auxList.append(math.log(auxVar))
+            auxVar = sum(auxList)
+            print(auxVar)
+            if auxVar > last_MLE:
+                last_MLE = auxVar
                 arcIdx = list(elem)
                 bestFirstArc = arc_Kde
+        
         adjacency_matrix = copy.deepcopy(initial_adjacency_matrix)
-        adjacency_matrix = self.__mtxModifier(adjacency_matrix,arcIdx)
-        probs.update({"1arc": bestFirstArc})
+        if arcIdx != []:
+            adjacency_matrix = self.__mtxModifier(adjacency_matrix,arcIdx)
+            probs.update({"1arc": bestFirstArc})
+        else:
+            return adjacency_matrix
         
-        arcAux = arcIdx.copy() #Inicio do código do segundo arco
-        arcAux.sort()
-        indices.remove(tuple(arcAux))
-        melhorSegundoArco = []
-        for elem in indices: 
-            if elem[0] == arcIdx[1]: #Início do primeiro caso.
-                c = [elem[0], elem[1], arcIdx[0]]
-                c.sort()
-                myData = self.__dataPartition(data, c)
-                h = self.multivariateNewtonRaphson(myData, initial_h)
-                kde_numerador = self.LOO_Kde(myData, h)
-                myData = self.__dataPartition(data, arcIdx)
-                h = self.multivariateNewtonRaphson(myData, initial_h)
-                kde_denominador = self.LOO_Kde(myData, h)
+        # arcAux = arcIdx.copy() #Inicio do código do segundo arco
+        # arcAux.sort()
+        # indices.remove(tuple(arcAux))
+        # melhorSegundoArco = []
+        # for elem in indices: 
+        #     if elem[0] == arcIdx[1]: #Início do primeiro caso.
+        #         c = [elem[0], elem[1], arcIdx[0]]
+        #         c.sort()
+        #         myData = self.__dataPartition(data, c)
+        #         h = self.multivariateNewtonRaphson(myData, initial_h)
+        #         kde_numerador = self.LOO_Kde(myData, h)
+        #         myData = self.__dataPartition(data, arcIdx)
+        #         h = self.multivariateNewtonRaphson(myData, initial_h)
+        #         kde_denominador = self.LOO_Kde(myData, h)
 
-                for i in range(len(kde_numerador)):
-                    auxVar5 = (kde_numerador[i]/kde_denominador[i])*probs.get("1arc")[i]
-                auxVarRange = [x for x in range(len(data[0]))]
-                auxVarRange.remove(elem[0])
-                auxVarRange.remove(elem[1])
-                for j in auxVarRange:
-                    auxVar5 = auxVar5*probs.get((j))[i]
-                secArcCaseOne = sum(math.log(auxVar5))
-                if secArcCaseOne > last_MLE:
-                    last_MLE = secArcCaseOne
-                    melhorSegundoArco = list(elem)
+        #         auxVar = []
+        #         auxList = []
+        #         for i in range(len(kde_numerador)):
+        #             auxVar.append((kde_numerador[i]/kde_denominador[i])*probs.get("1arc")[i])
+        #         auxVarRange = [x for x in range(len(data[0]))]
+        #         auxVarRange.remove(elem[0])
+        #         auxVarRange.remove(elem[1])
+        #         for i in range(len(kde_numerador)):
+        #             auxVar2 = auxVar[i]
+        #             for j in auxVarRange:
+        #                 auxVar2 = auxVar2*probs.get((j))[i]
+        #             auxList.append(math.log(auxVar2))
+        #         secArcCaseOne = sum(auxList)
+        #         if secArcCaseOne > last_MLE:
+        #             last_MLE = secArcCaseOne
+        #             melhorSegundoArco = list(elem)
             
-            secArcCaseTwoArray = [] #Início do segundo caso
-            for i in range(len(adjacency_matrix[0])):
-                if adjacency_matrix[elem[0]][i] == 1:
-                    secArcCaseTwoArray.append(i)
+        #     secArcCaseTwoArray = [] #Início do segundo caso
+        #     for i in range(len(adjacency_matrix[0])):
+        #         if adjacency_matrix[elem[0]][i] == 1:
+        #             secArcCaseTwoArray.append(i)
 
-            if secArcCaseTwoArray != []:
-                myData = self.__dataPartition(data, elem)
-                h = self.multivariateNewtonRaphson(myData, initial_h)
-                arc_Kde = self.LOO_Kde(myData, h)
+        #     if secArcCaseTwoArray != []:
+        #         myData = self.__dataPartition(data, elem)
+        #         h = self.multivariateNewtonRaphson(myData, initial_h)
+        #         arc_Kde = self.LOO_Kde(myData, h)
 
-                for i in range(len(arc_Kde)):
-                    auxVar6 = (arc_Kde[i]/probs.get(elem[0])[i])*probs.get("1arc")[i]
-                auxVarRange = [x for x in range(len(data[0]))]
-                for i in secArcCaseTwoArray:
-                    auxVarRange.remove(i)
-                auxVarRange.remove(elem[0])
-                auxVarRange.remove(elem[1])
-                for j in auxVarRange:
-                    auxVar6 = auxVar6*probs.get((j))[i]
-                secArcCaseTwo = sum(math.log(auxVar6))
-                if secArcCaseTwo > last_MLE:
-                    last_MLE = secArcCaseTwo
-                    melhorSegundoArco = list(elem)
+        #         auxVar = []
+        #         auxList = []
+        #         for i in range(len(arc_Kde)):
+        #             auxVar.append((arc_Kde[i]/probs.get(elem[0])[i])*probs.get("1arc")[i])
+        #         auxVarRange = [x for x in range(len(data[0]))]
+        #         for i in secArcCaseTwoArray:
+        #             auxVarRange.remove(i)
+        #         auxVarRange.remove(elem[0])
+        #         auxVarRange.remove(elem[1])
+        #         for i in range(len(arc_Kde)):
+        #             auxVar2 = auxVar[i]
+        #             for j in auxVarRange:
+        #                 auxVar2 = auxVar2*probs.get((j))[i]
+        #             auxList.append(math.log(auxVar2))
+        #         secArcCaseTwo = sum(auxList)
+        #         if secArcCaseTwo > last_MLE:
+        #             last_MLE = secArcCaseTwo
+        #             melhorSegundoArco = list(elem)
             
-            secArcCaseThreeArray = [] #Início do terceiro caso
-            for i in range(len(adjacency_matrix[0])):
-                if adjacency_matrix[i][elem[1]] == 1:
-                    secArcCaseThreeArray.append(i)
+        #     secArcCaseThreeArray = [] #Início do terceiro caso
+        #     for i in range(len(adjacency_matrix[0])):
+        #         if adjacency_matrix[i][elem[1]] == 1:
+        #             secArcCaseThreeArray.append(i)
 
-            if secArcCaseThreeArray != []:
-                myData = self.__dataPartition(data, elem)
-                h = self.multivariateNewtonRaphson(myData, initial_h)
-                arc_Kde = self.LOO_Kde(myData, h)
-                for i in range(len(arc_Kde)):
-                    auxVar7 = arc_Kde[i]+probs.get("1arc")[i]
-                auxVarRange = [x for x in range(len(data[0]))]
-                for i in secArcCaseThreeArray:
-                    auxVarRange.remove(i)
-                auxVarRange.remove(elem[1])
-                for j in auxVarRange:
-                    auxVar7 = auxVar7*probs.get((j))[i]
-                secArcCaseThree = sum(math.log(auxVar7))
-                if secArcCaseThree > last_MLE:
-                    last_MLE = secArcCaseThree
-                    melhorSegundoArco = list(elem)
+        #     if secArcCaseThreeArray != []:
+        #         myData = self.__dataPartition(data, elem)
+        #         h = self.multivariateNewtonRaphson(myData, initial_h)
+        #         arc_Kde = self.LOO_Kde(myData, h)
+                
+        #         auxVar = []
+        #         auxList = []
+        #         for i in range(len(arc_Kde)):
+        #             auxVar.append(arc_Kde[i]+probs.get("1arc")[i])
+        #         auxVarRange = [x for x in range(len(data[0]))]
+        #         for i in secArcCaseThreeArray:
+        #             auxVarRange.remove(i)
+        #         auxVarRange.remove(elem[1])
+        #         for i in range(len(arc_Kde)):
+        #             auxVar2 = auxVar[i]
+        #             for j in auxVarRange:
+        #                 auxVar2 = auxVar2*probs.get((j))[i]
+        #             auxList.append(math.log(auxVar2))
+        #         secArcCaseThree = sum(auxList)
+        #         if secArcCaseThree > last_MLE:
+        #             last_MLE = secArcCaseThree
+        #             melhorSegundoArco = list(elem)
 
-            secArcCaseFiveArray = [] #Início do quinto caso. Sim, nao tem (?) quarto caso
-            for i in range(len(adjacency_matrix[0])):
-                for j in range(len(adjacency_matrix[0])):
-                    if adjacency_matrix[i][j] == 1:
-                        secArcCaseFiveArray.append(i)
-                        secArcCaseFiveArray.append(j)
+        #     secArcCaseFiveArray = [] #Início do quinto caso. Sim, nao tem (?) quarto caso
+        #     for i in range(len(adjacency_matrix[0])):
+        #         for j in range(len(adjacency_matrix[0])):
+        #             if adjacency_matrix[i][j] == 1:
+        #                 secArcCaseFiveArray.append(i)
+        #                 secArcCaseFiveArray.append(j)
             
-            if secArcCaseFiveArray != []:
-                myData = self.__dataPartition(data, elem)
-                h = self.multivariateNewtonRaphson(myData, initial_h)
-                arc_Kde = self.LOO_Kde(myData, h)
+        #     if secArcCaseFiveArray != []:
+        #         sairDoCaso5 = False
+        #         for i in secArcCaseFiveArray:
+        #             if arcAux[0] == i or arcAux[1] == i:
+        #                 sairDoCaso5 = True
+        #         if sairDoCaso5:
+        #             continue
+        #         myData = self.__dataPartition(data, elem)
+        #         h = self.multivariateNewtonRaphson(myData, initial_h)
+        #         arc_Kde = self.LOO_Kde(myData, h)
 
-                for i in range(len(arc_Kde)):
-                    auxVar8 = arc_Kde[i]*probs.get("1arc")[i]
-                auxVarRange = [x for x in range(len(data[0]))]
-                for i in secArcCaseFiveArray:
-                    auxVarRange.remove(i)
-                auxVarRange.remove(elem[0])
-                auxVarRange.remove(elem[1])
-                for j in auxVarRange:
-                    auxVar8 = auxVar8*probs.get((j))[i]
-                secArcCaseFive = sum(math.log(auxVar8))
-                if secArcCaseFive > last_MLE:
-                    last_MLE = secArcCaseFive
-                    melhorSegundoArco = list(elem)
+        #         auxVar = []
+        #         auxList = []
+        #         for i in range(len(arc_Kde)):
+        #             auxVar.append(arc_Kde[i]*probs.get("1arc")[i])
+        #         auxVarRange = [x for x in range(len(data[0]))]
+        #         for i in secArcCaseFiveArray:
+        #             auxVarRange.remove(i)
+        #         auxVarRange.remove(elem[0])
+        #         auxVarRange.remove(elem[1])
+        #         for i in range(len(arc_Kde)):
+        #             auxVar2 = auxVar[i]
+        #             for j in auxVarRange:
+        #                 auxVar2 = auxVar2*probs.get((j))[i]
+        #             auxList.append(math.log(auxVar2))
+        #         secArcCaseFive = sum(auxList)
+        #         if secArcCaseFive > last_MLE:
+        #             last_MLE = secArcCaseFive
+        #             melhorSegundoArco = list(elem)
         
-        if indices != [] and melhorSegundoArco !=[]:
-            adjacency_matrix = self.__mtxModifier(adjacency_matrix,melhorSegundoArco)
+        # if indices != [] and melhorSegundoArco !=[]:
+        #     adjacency_matrix = self.__mtxModifier(adjacency_matrix,melhorSegundoArco)
         return adjacency_matrix
