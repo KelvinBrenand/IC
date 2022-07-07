@@ -394,6 +394,7 @@ class newtonRapson(object):
         for i in range(n):
             for j in range(i+1, n):
                 c.append((i,j))
+                c.append((j,i))
         return c
     
     def __dataPartition(self,data,index):
@@ -438,7 +439,6 @@ class newtonRapson(object):
             auxList.append(math.log(auxVar))
             auxVar = 1.0
         last_MLE = sum(auxList)
-        print(last_MLE)
 
         indices = self.__pairs(len(data[0])) #Inicio do código do primeiro arco
         arcIdx = []
@@ -458,7 +458,6 @@ class newtonRapson(object):
                     auxVar = auxVar*probs.get((j))[i]
                 auxList.append(math.log(auxVar))
             auxVar = sum(auxList)
-            print(auxVar)
             if auxVar > last_MLE:
                 last_MLE = auxVar
                 arcIdx = list(elem)
@@ -471,9 +470,8 @@ class newtonRapson(object):
         else:
             return adjacency_matrix
         
-        arcAux = arcIdx.copy() #Inicio do código do segundo arco
-        arcAux.sort()
-        indices.remove(tuple(arcAux))
+        indices.remove(tuple(arcIdx)) #Inicio do código do segundo arco
+        indices.remove((arcIdx[1],arcIdx[0]))
         melhorSegundoArco = []
         for elem in indices: 
             if elem[0] == arcIdx[1]: #Início do primeiro caso.
@@ -570,7 +568,7 @@ class newtonRapson(object):
             if secArcCaseFiveArray != []:
                 sairDoCaso5 = False
                 for i in secArcCaseFiveArray:
-                    if arcAux[0] == i or arcAux[1] == i:
+                    if arcIdx[0] == i or arcIdx[1] == i:
                         sairDoCaso5 = True
                 if sairDoCaso5:
                     continue
