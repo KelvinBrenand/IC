@@ -48,18 +48,19 @@ class newtonRapson(object):
             resultSecDer.append((sumTop*-3)/(sumBottom*h*h*h*h))
         return sum(resultFirstDer)-(len(data)/h), sum(resultSecDer)+(len(data)/(h*h))
     
-    def newtonRaphson(self, data, h=1.0, epsilon=0.01, max_iter=20):
+    def __newtonRaphson(self, data, h=1.0, epsilon=0.01, max_iter=20):
         """Performs the Newton-Raphson's method to estimate the best value to the Kernel Density Estimation (KDE) bandwidth parameter.
+           If it does not converge with the initial h value, the method will be executed again with the a new h value (h = h-1.0) until MIN_H_VALUE is reached. 
 
         Args:
             data (list): Datapoints to estimate from.
-            h (float): Initial bandwidth value, default=1.0
-            epsilon(float): The method's threshold, defaut=0.01
-            max_iter(int): Maximum number of iterations
+            h (float): Initial bandwidth value, default=1.0.
+            epsilon(float): The method's threshold, defaut=0.01.
+            max_iter(int): Maximum number of iterations.
 
         Returns:
             float: The best bandwidth value considering the input data.
-            None:  If the method finds a 0 derivative or maximum number of iterations is reached 
+            None:  If the method finds a 0 derivative or maximum number of iterations is reached. 
 
         Error Messages:
             EXIT_FAIL_INVALID_DATA_TYPE: Input set type must be a list.
@@ -112,7 +113,7 @@ class newtonRapson(object):
                 break
         return best_h
     
-    def kernelDensityEstimation(self, x, data, h):
+    def __kernelDensityEstimation(self, x, data, h):
         """Computes the Kernel Density Estimation (KDE) using the gaussian kernel and the Leave-One-Out technique of the given datapoints and bandwidth parameter.
 
         Args:
@@ -277,18 +278,19 @@ class newtonRapson(object):
             resultSecDer.append((sumTop*-3)/(sumBottom*h*h*h*h))
         return sum(resultFirstDer)-(len(data)*self.__ndim(data)/h), sum(resultSecDer)+(len(data)*self.__ndim(data)/(h*h))
     
-    def multivariateNewtonRaphson(self, data, h=1.0, epsilon=0.01, max_iter=20):
+    def __multivariateNewtonRaphson(self, data, h=1.0, epsilon=0.01, max_iter=20):
         """Performs the Multivariate Newton-Raphson's method to estimate the best value to the Multivariate Kernel Density Estimation (MKDE) bandwidth parameter.
+           If it does not converge with the initial h value, the method will be executed again with the a new h value (h = h-1.0) until MIN_H_VALUE is reached.
 
         Args:
             data (list): Datapoints to estimate from.
-            h (float): Initial bandwidth value, default=1.0
-            epsilon(float): The method's threshold, defaut=0.01
-            max_iter(int): Maximum number of iterations
+            h (float): Initial bandwidth value, default=1.0.
+            epsilon(float): The method's threshold, defaut=0.01.
+            max_iter(int): Maximum number of iterations.
 
         Returns:
             float: The best bandwidth value considering the input data.
-            None:  If the method finds a 0 derivative or maximum number of iterations is reached
+            None:  If the method finds a 0 derivative or maximum number of iterations is reached.
 
         Error Messages:
             EXIT_FAIL_INVALID_DATA_TYPE: Input set type must be a list.
@@ -341,7 +343,7 @@ class newtonRapson(object):
                 break
         return best_h
 
-    def multivariateKernelDensityEstimation(self, x, data, h):
+    def __multivariateKernelDensityEstimation(self, x, data, h):
         """Computes the Multivariate Kernel Density Estimation (MKDE) using the multivariate gaussian kernel and the Leave-One-Out technique of the given datapoints and bandwidth parameter.
 
         Args:
@@ -373,23 +375,49 @@ class newtonRapson(object):
         return (sum/(len(data)*h**self.__ndim(x)))
 
     def LOO_Kde(self, data, h):
+        """Performs the Leave-One-Out for either the 1D KDE or the Multivariate KDE.
+
+        Args:
+            data (List): Datapoints to compute the KDE from.
+            h (float): Bandwidth parameter.
+
+        Returns:
+            list: KDE of the input data and bandwidth.
+        """
         auxVar = [None] * len(data)
         databkp = data.copy()
         for i in range(len(data)):
             element = databkp[i]
             databkp.pop(i)
             if isinstance(element, float):
-                auxVar[i] = self.kernelDensityEstimation(element, databkp, h)
+                auxVar[i] = self.__kernelDensityEstimation(element, databkp, h)
             else:
-                auxVar[i] = self.multivariateKernelDensityEstimation(element, databkp, h)
+                auxVar[i] = self.__multivariateKernelDensityEstimation(element, databkp, h)
             databkp.clear()
             databkp = data.copy()
         return auxVar
 
-    def __column(self, matrix, i):
-        return [row[i] for row in matrix]
+    def __column(self, data, i):
+        """Returns a specific column from a N dimensional list.
+
+        Args:
+            data (list): The complete initial list.
+            i (int): The specific column index.
+
+        Returns:
+            list: The specific column of the N dimentional data.
+        """
+        return [row[i] for row in data]
 
     def __pairs(self, n):
+        """Returns all possible pairs from 0 up to n. E.g.: For n = 2, it will return [(0,1),(1,0),(0,2),(2,0),(1,2),(2,1)].
+
+        Args:
+            n (int): The upper limit from where the method will generate the pairs.
+
+        Returns:
+            list of tuples: The list of all the pairs.
+        """
         c = []
         for i in range(n):
             for j in range(i+1, n):
@@ -398,6 +426,15 @@ class newtonRapson(object):
         return c
     
     def __dataPartition(self,data,index):
+        """Returns two specific columns from a N dimensional list.
+
+        Args:
+            data (list): The complete initial list.
+            index (tuple): The specific columns.
+
+        Returns:
+            list: The specific columns of the N dimentional data.
+        """
         e = []
         for i in range(len(data)):
             f = []
@@ -408,14 +445,39 @@ class newtonRapson(object):
 
 
     def __mtxModifier(self, mtx, idx):
+        """Modifies the adjacency matrix that will be returned by the MLE method.
+
+        Args:
+            mtx (list): Initial adjacency matrix.
+            idx (list): The index that will be modified in the adjacency matrix.
+
+        Returns:
+            list: The modified adjacency matrix.
+        """
         mtx[idx[0]][idx[1]] = 1
         return mtx
 
     def __trace(self, matrix):
+        """Sum of diagonal elements of a matrix.
+
+        Args:
+            matrix (list): The matrix that will have its diagonal elements summed up.
+
+        Returns:
+            Int: The sum of diagonal elements.
+        """
         return sum(matrix[i][i] for i in range(len(matrix[0])))
     
     def __cycle(self, matrix):
-        An = matrix
+        """Detects cycles in an adjacency matrix.
+
+        Args:
+            matrix (list): The matrix that will be verified.
+
+        Returns:
+            Bool: True if the matrix has cycles. False otherwise.
+        """
+        An = matrix.copy()
         for i in range(1,len(matrix[0])):
             An = self.__dot(An, matrix)
             if self.__trace(An) != 0:
@@ -429,7 +491,7 @@ class newtonRapson(object):
         initial_adjacency_matrix = [[0 for i in range(len(data[0]))] for n in range(len(data[0]))]
         adjacency_matrix = []
         for i in range (len(data[0])): #Inicio do código do MLE independente
-            h = self.newtonRaphson(self.__column(data, i), initial_h)
+            h = self.__newtonRaphson(self.__column(data, i), initial_h)
             probs.update({(i):self.LOO_Kde(self.__column(data, i), h)})
         auxList = []
         
@@ -445,7 +507,7 @@ class newtonRapson(object):
         bestFirstArc = []
         for elem in indices:
             myData = self.__dataPartition(data, elem)
-            h = self.multivariateNewtonRaphson(myData, initial_h)
+            h = self.__multivariateNewtonRaphson(myData, initial_h)
             arc_Kde = self.LOO_Kde(myData, h)
 
             auxList = []
@@ -478,10 +540,10 @@ class newtonRapson(object):
                 c = [elem[0], elem[1], arcIdx[0]]
                 c.sort()
                 myData = self.__dataPartition(data, c)
-                h = self.multivariateNewtonRaphson(myData, initial_h)
+                h = self.__multivariateNewtonRaphson(myData, initial_h)
                 kde_numerador = self.LOO_Kde(myData, h)
                 myData = self.__dataPartition(data, arcIdx)
-                h = self.multivariateNewtonRaphson(myData, initial_h)
+                h = self.__multivariateNewtonRaphson(myData, initial_h)
                 kde_denominador = self.LOO_Kde(myData, h)
 
                 auxVar = []
@@ -508,7 +570,7 @@ class newtonRapson(object):
 
             if secArcCaseTwoArray != []:
                 myData = self.__dataPartition(data, elem)
-                h = self.multivariateNewtonRaphson(myData, initial_h)
+                h = self.__multivariateNewtonRaphson(myData, initial_h)
                 arc_Kde = self.LOO_Kde(myData, h)
 
                 auxVar = []
@@ -537,7 +599,7 @@ class newtonRapson(object):
 
             if secArcCaseThreeArray != []:
                 myData = self.__dataPartition(data, elem)
-                h = self.multivariateNewtonRaphson(myData, initial_h)
+                h = self.__multivariateNewtonRaphson(myData, initial_h)
                 arc_Kde = self.LOO_Kde(myData, h)
                 
                 auxVar = []
@@ -573,7 +635,7 @@ class newtonRapson(object):
                 if sairDoCaso5:
                     continue
                 myData = self.__dataPartition(data, elem)
-                h = self.multivariateNewtonRaphson(myData, initial_h)
+                h = self.__multivariateNewtonRaphson(myData, initial_h)
                 arc_Kde = self.LOO_Kde(myData, h)
 
                 auxVar = []
