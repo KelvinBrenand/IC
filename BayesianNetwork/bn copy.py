@@ -484,16 +484,16 @@ class newtonRapson(object):
                 return True
         return False
 
-    def func(self,probs, elem):#Diz quem recebe de quem
+    def func(self,arcos, elem):#Diz quem recebe de quem
         retorno = {}
         aux = []
-        for i in probs:
+        for i in arcos:
             if isinstance(i, tuple):
                 if i[1] == elem:
                     aux.append(i[0])
         retorno.update({elem:aux})
         for j in aux:
-            retorno.update(self.func(probs,j))
+            retorno.update(self.func(arcos,j))
         return retorno
 
     def MLE(self,data):
@@ -530,7 +530,12 @@ class newtonRapson(object):
                     pass
             else:
                 if list(self.func(arcos,elem[0]).values()) == [[]]: #receptor já recebe, emissor solto
-                    pass
+                    myData = self.__dataPartition(data, elem)
+                    h = self.__multivariateNewtonRaphson(myData, initial_h)
+                    arc_Kde = self.LOO_Kde(myData, h)
+
+                    for i in range(len(arc_Kde)):#Falta multiplicar pelo que o receptor já recebe
+                        arc_Kde[i] = arc_Kde[i]/probNoIndiv.get(elem[0])[i]
                 else: #receptor já recebe, emissor já recebe
                     pass
             #TODO Calcular probabilidade final.
