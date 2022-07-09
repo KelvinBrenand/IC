@@ -517,13 +517,22 @@ class newtonRapson(object):
         arcos = list(probNoIndiv.keys()) #Inicio dos arcos
         indices = self.__pairs(len(data[0])) 
         for elem in indices:
-            if list(self.func(arcos,elem[1]).values()) == [[]]: #receptor solto
-                if list(self.func(arcos,elem[0]).values()) == [[]]: #emissor solto
+            if list(self.func(arcos,elem[1]).values()) == [[]]: 
+                if list(self.func(arcos,elem[0]).values()) == [[]]: #receptor solto, emissor solto
                     myData = self.__dataPartition(data, elem)
                     h = self.__multivariateNewtonRaphson(myData, initial_h)
                     arc_Kde = self.LOO_Kde(myData, h)
 
                     for i in range(len(arc_Kde)):
                         arc_Kde[i] = arc_Kde[i]/probNoIndiv.get(elem[0])[i]
-                    
+                
+                else: #receptor solto, emissor já recebe
+                    pass
+            else:
+                if list(self.func(arcos,elem[0]).values()) == [[]]: #receptor já recebe, emissor solto
+                    pass
+                else: #receptor já recebe, emissor já recebe
+                    pass
+            #TODO Calcular probabilidade final.
+            # Se não gerar ciclo e tiveer MLE > last_MLE: adiciona arco, atualiza matriz de adjacência
         return adjacency_matrix
