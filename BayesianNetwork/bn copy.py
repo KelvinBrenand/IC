@@ -496,6 +496,47 @@ class newtonRapson(object):
             retorno.update(self.func(arcos,j))
         return retorno
 
+    def func2(self,arcs):#Organiza quem recebe de quem
+        myDict = arcs.copy()
+        myList1 = []
+        for i in arcs.keys():
+            if arcs.get(i) == []:
+                myDict.pop(i)
+        for i in myDict.keys():
+            for j in myDict.get(i):
+                myList1.append([i,j])
+        
+        if len(myList1) == 1:
+            return myList1
+        else:
+            mylist3 = myList1.copy()
+            myList2 = []
+            while mylist3 != []:
+                myList4 = []
+                myList4.clear()
+                teste = mylist3[0]
+                mylist3.remove(teste)
+                if mylist3 == []:
+                    break
+                for j in mylist3:
+                    if teste[-1] == j[0]:
+                        aux = teste.copy()
+                        aux.append(j[1])
+                        myList2.append(aux)
+                        myList4.append(j)
+                for m in myList4:
+                    mylist3.remove(m)
+                
+            mylist3 = myList1.copy()
+            for i in myList2:
+                for j in mylist3:
+                    if i[-1] == j[0]:
+                        i.append(j[1])
+            if myList2 == []:
+                return myList1
+            else:
+                return myList2
+
     def MLE(self,data):
         initial_h = 1.0
         auxVar = 1.0
@@ -534,8 +575,39 @@ class newtonRapson(object):
                     h = self.__multivariateNewtonRaphson(myData, initial_h)
                     arc_Kde = self.LOO_Kde(myData, h)
 
-                    for i in range(len(arc_Kde)):#Falta multiplicar pelo que o receptor já recebe
+                    for i in range(len(arc_Kde)):
                         arc_Kde[i] = arc_Kde[i]/probNoIndiv.get(elem[0])[i]
+
+                    auxVar = self.func(arcos,elem[1])
+                    auxVar = self.func2(auxVar)
+                    arcosJaInseridosEmNoAlvo = []
+                    somaDosArcosInseridos = []
+                    for i in auxVar:
+                        auxVar2 = [x for x in i if x != elem[1]]
+                        myData2 = self.__dataPartition(data, i)
+                        h2 = self.__multivariateNewtonRaphson(myData2, initial_h)
+                        arc_Kde2 = self.LOO_Kde(myData2, h2)
+                        
+                        myData3 = []
+                        h3 = []
+                        arc_Kde3 = []
+                        if len(auxVar2) == 1:
+                            arc_Kde3 = probNoIndiv.get(auxVar2[0])
+                        else:
+                            myData3 = self.__dataPartition(data, auxVar2)
+                            h3 = self.__multivariateNewtonRaphson(myData3, initial_h)
+                            arc_Kde3 = self.LOO_Kde(myData3, h3)
+                        
+                        for i in range(len(arc_Kde)):
+                            arc_Kde2[i] = arc_Kde2[i]/arc_Kde3[i]
+                        
+                        arcosJaInseridosEmNoAlvo.append(arc_Kde2)
+                    
+                    for i in range(len(arcosJaInseridosEmNoAlvo[0])):
+                        somaDosArcosInseridos.append(0)
+                        for j in range(len(arcosJaInseridosEmNoAlvo)):
+                            somaDosArcosInseridos[i] = somaDosArcosInseridos[i]+arcosJaInseridosEmNoAlvo[j][i]+arc_Kde[i]
+
                 else: #receptor já recebe, emissor já recebe
                     pass
             #TODO Calcular probabilidade final.
