@@ -1,7 +1,6 @@
 # Author: Kelvin Brenand <brenand.kelvin@gmail.com>
 
 import math
-import copy
 
 class newtonRapson(object):
     '''
@@ -541,8 +540,8 @@ class newtonRapson(object):
         initial_h = 1.0
         auxVar = 1.0
         probNoIndiv = {}
-        initial_adjacency_matrix = [[0 for i in range(len(data[0]))] for n in range(len(data[0]))]
-        adjacency_matrix = []
+        #initial_adjacency_matrix = [[0 for i in range(len(data[0]))] for n in range(len(data[0]))]
+        adjacency_matrix = [[0 for i in range(len(data[0]))] for n in range(len(data[0]))]
         for i in range (len(data[0])): #Inicio do código do MLE independente
             h = self.__newtonRaphson(self.__column(data, i), initial_h)
             probNoIndiv.update({(i):self.LOO_Kde(self.__column(data, i), h)})
@@ -566,6 +565,8 @@ class newtonRapson(object):
 
                     for i in range(len(arc_Kde)):
                         arc_Kde[i] = arc_Kde[i]/probNoIndiv.get(elem[0])[i]
+
+                    somaDosArcosInseridos = arc_Kde.copy()
                 
                 else: #receptor solto, emissor já recebe
                     auxVar = self.func(arcos,elem[0])
@@ -675,7 +676,52 @@ class newtonRapson(object):
                         somaDosArcosInseridos.append(0)
                         for j in range(len(arcosInseridos)):
                             somaDosArcosInseridos[i] = somaDosArcosInseridos[i]+arcosInseridos[j][i]
-                            
-            #TODO Calcular probabilidade final.
-            # Se não gerar ciclo e tiveer MLE > last_MLE: adiciona arco, atualiza matriz de adjacência
+            
+            try:
+                indices.index((elem[1],elem[0]))
+                indicePar0 = elem
+                resultadoPar0 = somaDosArcosInseridos.copy()
+            except:
+                indicePar1 = elem
+                resultadoPar1 = somaDosArcosInseridos.copy()
+                mtxCopy = adjacency_matrix.copy()
+                mtxCopy = self.__mtxModifier(mtxCopy,indicePar0)
+                mlePar0 = None
+                if not self.__cycle(mtxCopy):
+                    auxDictPar0 = probNoIndiv.copy()
+                    auxDictPar0.update({indicePar0[1]:resultadoPar0})
+                    mlePar0 = []
+                    for i in auxDictPar0.keys():
+                        mlePar0.append(1)
+                        for j in range(len(auxDictPar0.get(i))):
+                            mlePar0[i] = mlePar0[i]*auxDictPar0.get(j)[i]
+                        mlePar0[i] = math.log(mlePar0[i])
+                    mlePar0 = sum(mlePar0)
+                
+                mtxCopy = adjacency_matrix.copy()
+                mtxCopy = self.__mtxModifier(mtxCopy,indicePar1)
+                mlePar1 = None
+                if not self.__cycle(mtxCopy):
+                    auxDictPar1 = probNoIndiv.copy()
+                    auxDictPar1.update({indicePar1[1]:resultadoPar1})
+                    mlePar1 = []
+                    for i in auxDictPar1.keys():
+                        mlePar1.append(1)
+                        for j in range(len(auxDictPar1.get(i))):
+                            mlePar1[i] = mlePar1[i]*auxDictPar1.get(j)[i]
+                        mlePar1[i] = math.log(mlePar1[i])
+                    mlePar1 = sum(mlePar1)
+
+                if mlePar0 != None and mlePar1 != None:
+                    if mlePar0 > mlePar1:
+                        if mlePar0 > last_MLE:
+                            last_MLE = mlePar0
+                            adjacency_matrix = self.__mtxModifier(adjacency_matrix, indicePar0)
+                            probNoIndiv = auxDictPar0.copy()
+                    else:
+                        if mlePar1 > last_MLE:
+                            last_MLE = mlePar1
+                            adjacency_matrix = self.__mtxModifier(adjacency_matrix, indicePar1)
+                            probNoIndiv = auxDictPar1.copy()
+
         return adjacency_matrix
