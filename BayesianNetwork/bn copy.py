@@ -630,7 +630,52 @@ class newtonRapson(object):
                             somaDosArcosInseridos[i] = somaDosArcosInseridos[i]+arcosJaInseridosEmNoAlvo[j][i]+arc_Kde[i]
 
                 else: #receptor já recebe, emissor já recebe
-                    pass
+                    auxVar = self.func(arcos,elem[0])
+                    auxVar = self.func2(auxVar)
+                    arcosInseridos = []
+                    somaDosArcosInseridos = []
+                    for i in auxVar:
+                        myData = self.__dataPartition(data, i)
+                        h = self.__multivariateNewtonRaphson(myData, initial_h)
+                        arc_Kde = self.LOO_Kde(myData, h)
+
+                        i.append(elem[1])
+                        myData2 = self.__dataPartition(data, i)
+                        h2 = self.__multivariateNewtonRaphson(myData2, initial_h)
+                        arc_Kde2 = self.LOO_Kde(myData2, h2)
+
+                        for i in range(len(arc_Kde)):
+                            arc_Kde[i] = arc_Kde2[i]/arc_Kde[i]
+                        arcosInseridos.append(arc_Kde)
+
+                    auxVar = self.func(arcos,elem[1])
+                    auxVar = self.func2(auxVar)
+                    for i in auxVar:
+                        myData2 = self.__dataPartition(data, i)
+                        h2 = self.__multivariateNewtonRaphson(myData2, initial_h)
+                        arc_Kde2 = self.LOO_Kde(myData2, h2)
+                        
+                        auxVar2 = [x for x in i if x != elem[1]]
+                        myData3 = []
+                        h3 = []
+                        arc_Kde3 = []
+                        if len(auxVar2) == 1:
+                            arc_Kde3 = probNoIndiv.get(auxVar2[0])
+                        else:
+                            myData3 = self.__dataPartition(data, auxVar2)
+                            h3 = self.__multivariateNewtonRaphson(myData3, initial_h)
+                            arc_Kde3 = self.LOO_Kde(myData3, h3)
+                        
+                        for i in range(len(arc_Kde)):
+                            arc_Kde2[i] = arc_Kde2[i]/arc_Kde3[i]
+                        
+                        arcosInseridos.append(arc_Kde2)
+                    
+                    for i in range(len(arcosInseridos[0])):
+                        somaDosArcosInseridos.append(0)
+                        for j in range(len(arcosInseridos)):
+                            somaDosArcosInseridos[i] = somaDosArcosInseridos[i]+arcosInseridos[j][i]
+                            
             #TODO Calcular probabilidade final.
             # Se não gerar ciclo e tiveer MLE > last_MLE: adiciona arco, atualiza matriz de adjacência
         return adjacency_matrix
