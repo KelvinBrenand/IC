@@ -144,8 +144,6 @@ class newtonRapson(object):
             sum += self.__gaussian((x - data[i])/h)
         return (sum/(len(data)*h))
 
-    ###################### MULTIDIMENTIONAL NEWTON RAPHSON ######################
-
     def __identityMatrix(self, n):
         """Generates an identity matrix of dimension NxN.
 
@@ -505,7 +503,7 @@ class newtonRapson(object):
             retorno.update(self.__insertedArcs(arcos,j))
         return retorno
 
-    def __probPaths(self,arcs):#Organiza quem recebe de quem
+    def __probPaths(self,arcs):
         """All the necessary ways to calculate the probability of a node.
 
         Args:
@@ -567,7 +565,7 @@ class newtonRapson(object):
         auxVar = 1.0
         probNoIndiv = {}
         adjacency_matrix = [[0 for i in range(len(data[0]))] for n in range(len(data[0]))]
-        for i in range (len(data[0])): #Inicio do código do MLE independente
+        for i in range (len(data[0])):
             h = self.__newtonRaphson(self.__column(data, i), initial_h)
             probNoIndiv.update({(i):self.__LOO_Kde(self.__column(data, i), h)})
         auxList = []
@@ -580,12 +578,12 @@ class newtonRapson(object):
         last_MLE = sum(auxList)
         print("lastMLE",last_MLE)
 
-        arcos = list(probNoIndiv.keys()) #Inicio dos arcos
+        arcos = list(probNoIndiv.keys())
         indices = self.__pairs(len(data[0]))
         indicesCopy = indices.copy() 
         for elem in indices:
             if list(self.__insertedArcs(arcos,elem[1]).values()) == [[]]: 
-                if list(self.__insertedArcs(arcos,elem[0]).values()) == [[]]: #receptor solto, emissor solto
+                if list(self.__insertedArcs(arcos,elem[0]).values()) == [[]]:
                     myData = self.__dataPartition(data, elem)
                     h = self.__multivariateNewtonRaphson(myData, initial_h)
                     arc_Kde = self.__LOO_Kde(myData, h)
@@ -595,7 +593,7 @@ class newtonRapson(object):
 
                     somaDosArcosInseridos = arc_Kde.copy()
                 
-                else: #receptor solto, emissor já recebe
+                else:
                     auxVar = self.__insertedArcs(arcos,elem[0])
                     auxVar = self.__probPaths(auxVar)
                     arcosInseridos = []
@@ -619,7 +617,7 @@ class newtonRapson(object):
                         for j in range(len(arcosInseridos)):
                             somaDosArcosInseridos[i] = somaDosArcosInseridos[i]+arcosInseridos[j][i]
             else:
-                if list(self.__insertedArcs(arcos,elem[0]).values()) == [[]]: #receptor já recebe, emissor solto
+                if list(self.__insertedArcs(arcos,elem[0]).values()) == [[]]:
                     myData = self.__dataPartition(data, elem)
                     h = self.__multivariateNewtonRaphson(myData, initial_h)
                     arc_Kde = self.__LOO_Kde(myData, h)
@@ -657,7 +655,7 @@ class newtonRapson(object):
                         for j in range(len(arcosJaInseridosEmNoAlvo)):
                             somaDosArcosInseridos[i] = somaDosArcosInseridos[i]+arcosJaInseridosEmNoAlvo[j][i]+arc_Kde[i]
 
-                else: #receptor já recebe, emissor já recebe
+                else:
                     auxVar = self.__insertedArcs(arcos,elem[0])
                     auxVar = self.__probPaths(auxVar)
                     arcosInseridos = []
