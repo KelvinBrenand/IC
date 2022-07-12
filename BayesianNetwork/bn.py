@@ -374,7 +374,7 @@ class newtonRapson(object):
             sum += self.__multivariateGaussian(self.__listDivision(self.__listSubtraction(x, data[i]), h))
         return (sum/(len(data)*h**self.__ndim(x)))
 
-    def LOO_Kde(self, data, h):
+    def __LOO_Kde(self, data, h):
         """Performs the Leave-One-Out for either the 1D KDE or the Multivariate KDE.
 
         Args:
@@ -484,7 +484,16 @@ class newtonRapson(object):
                 return True
         return False
 
-    def func(self,arcos, elem):#Diz quem recebe de quem
+    def __insertedArcs(self,arcos, elem):
+        """Returns a dictionary with all nodes associated to elem.
+
+        Args:
+            arcos (list): List with all the nodes and all the arcs
+            elem (int): Target node
+
+        Returns:
+            dictionary: All nodes associated to elem
+        """
         retorno = {}
         aux = []
         for i in arcos:
@@ -493,10 +502,18 @@ class newtonRapson(object):
                     aux.append(i[0])
         retorno.update({elem:aux})
         for j in aux:
-            retorno.update(self.func(arcos,j))
+            retorno.update(self.__insertedArcs(arcos,j))
         return retorno
 
-    def func2(self,arcs):#Organiza quem recebe de quem
+    def __probPaths(self,arcs):#Organiza quem recebe de quem
+        """All the necessary ways to calculate the probability of a node.
+
+        Args:
+            arcs (dictionary): All nodes associated to a target node
+
+        Returns:
+            list: All probability paths associated with a target node.
+        """
         myDict = arcs.copy()
         myList1 = []
         for i in arcs.keys():
@@ -538,14 +555,21 @@ class newtonRapson(object):
                 return myList2
 
     def MLE(self,data):
+        """Computes the Maximum-Likelihood Estimation (MLE) of data and returns the adjacency matrix.
+
+        Args:
+            data (list): Datapoints to compute the MLE from.
+
+        Returns:
+            list: The adjacency matrix associated with data.
+        """
         initial_h = 1.0
         auxVar = 1.0
         probNoIndiv = {}
-        #initial_adjacency_matrix = [[0 for i in range(len(data[0]))] for n in range(len(data[0]))]
         adjacency_matrix = [[0 for i in range(len(data[0]))] for n in range(len(data[0]))]
         for i in range (len(data[0])): #Inicio do código do MLE independente
             h = self.__newtonRaphson(self.__column(data, i), initial_h)
-            probNoIndiv.update({(i):self.LOO_Kde(self.__column(data, i), h)})
+            probNoIndiv.update({(i):self.__LOO_Kde(self.__column(data, i), h)})
         auxList = []
         
         for i in range(len(probNoIndiv.get((0)))):
@@ -560,11 +584,11 @@ class newtonRapson(object):
         indices = self.__pairs(len(data[0]))
         indicesCopy = indices.copy() 
         for elem in indices:
-            if list(self.func(arcos,elem[1]).values()) == [[]]: 
-                if list(self.func(arcos,elem[0]).values()) == [[]]: #receptor solto, emissor solto
+            if list(self.__insertedArcs(arcos,elem[1]).values()) == [[]]: 
+                if list(self.__insertedArcs(arcos,elem[0]).values()) == [[]]: #receptor solto, emissor solto
                     myData = self.__dataPartition(data, elem)
                     h = self.__multivariateNewtonRaphson(myData, initial_h)
-                    arc_Kde = self.LOO_Kde(myData, h)
+                    arc_Kde = self.__LOO_Kde(myData, h)
 
                     for i in range(len(arc_Kde)):
                         arc_Kde[i] = arc_Kde[i]/probNoIndiv.get(elem[0])[i]
@@ -572,19 +596,19 @@ class newtonRapson(object):
                     somaDosArcosInseridos = arc_Kde.copy()
                 
                 else: #receptor solto, emissor já recebe
-                    auxVar = self.func(arcos,elem[0])
-                    auxVar = self.func2(auxVar)
+                    auxVar = self.__insertedArcs(arcos,elem[0])
+                    auxVar = self.__probPaths(auxVar)
                     arcosInseridos = []
                     somaDosArcosInseridos = []
                     for i in auxVar:
                         myData = self.__dataPartition(data, i)
                         h = self.__multivariateNewtonRaphson(myData, initial_h)
-                        arc_Kde = self.LOO_Kde(myData, h)
+                        arc_Kde = self.__LOO_Kde(myData, h)
 
                         i.append(elem[1])
                         myData2 = self.__dataPartition(data, i)
                         h2 = self.__multivariateNewtonRaphson(myData2, initial_h)
-                        arc_Kde2 = self.LOO_Kde(myData2, h2)
+                        arc_Kde2 = self.__LOO_Kde(myData2, h2)
 
                         for i in range(len(arc_Kde)):
                             arc_Kde[i] = arc_Kde2[i]/arc_Kde[i]
@@ -595,22 +619,22 @@ class newtonRapson(object):
                         for j in range(len(arcosInseridos)):
                             somaDosArcosInseridos[i] = somaDosArcosInseridos[i]+arcosInseridos[j][i]
             else:
-                if list(self.func(arcos,elem[0]).values()) == [[]]: #receptor já recebe, emissor solto
+                if list(self.__insertedArcs(arcos,elem[0]).values()) == [[]]: #receptor já recebe, emissor solto
                     myData = self.__dataPartition(data, elem)
                     h = self.__multivariateNewtonRaphson(myData, initial_h)
-                    arc_Kde = self.LOO_Kde(myData, h)
+                    arc_Kde = self.__LOO_Kde(myData, h)
 
                     for i in range(len(arc_Kde)):
                         arc_Kde[i] = arc_Kde[i]/probNoIndiv.get(elem[0])[i]
 
-                    auxVar = self.func(arcos,elem[1])
-                    auxVar = self.func2(auxVar)
+                    auxVar = self.__insertedArcs(arcos,elem[1])
+                    auxVar = self.__probPaths(auxVar)
                     arcosJaInseridosEmNoAlvo = []
                     somaDosArcosInseridos = []
                     for i in auxVar:
                         myData2 = self.__dataPartition(data, i)
                         h2 = self.__multivariateNewtonRaphson(myData2, initial_h)
-                        arc_Kde2 = self.LOO_Kde(myData2, h2)
+                        arc_Kde2 = self.__LOO_Kde(myData2, h2)
                         
                         auxVar2 = [x for x in i if x != elem[1]]
                         myData3 = []
@@ -621,7 +645,7 @@ class newtonRapson(object):
                         else:
                             myData3 = self.__dataPartition(data, auxVar2)
                             h3 = self.__multivariateNewtonRaphson(myData3, initial_h)
-                            arc_Kde3 = self.LOO_Kde(myData3, h3)
+                            arc_Kde3 = self.__LOO_Kde(myData3, h3)
                         
                         for i in range(len(arc_Kde)):
                             arc_Kde2[i] = arc_Kde2[i]/arc_Kde3[i]
@@ -634,30 +658,30 @@ class newtonRapson(object):
                             somaDosArcosInseridos[i] = somaDosArcosInseridos[i]+arcosJaInseridosEmNoAlvo[j][i]+arc_Kde[i]
 
                 else: #receptor já recebe, emissor já recebe
-                    auxVar = self.func(arcos,elem[0])
-                    auxVar = self.func2(auxVar)
+                    auxVar = self.__insertedArcs(arcos,elem[0])
+                    auxVar = self.__probPaths(auxVar)
                     arcosInseridos = []
                     somaDosArcosInseridos = []
                     for i in auxVar:
                         myData = self.__dataPartition(data, i)
                         h = self.__multivariateNewtonRaphson(myData, initial_h)
-                        arc_Kde = self.LOO_Kde(myData, h)
+                        arc_Kde = self.__LOO_Kde(myData, h)
 
                         i.append(elem[1])
                         myData2 = self.__dataPartition(data, i)
                         h2 = self.__multivariateNewtonRaphson(myData2, initial_h)
-                        arc_Kde2 = self.LOO_Kde(myData2, h2)
+                        arc_Kde2 = self.__LOO_Kde(myData2, h2)
 
                         for i in range(len(arc_Kde)):
                             arc_Kde[i] = arc_Kde2[i]/arc_Kde[i]
                         arcosInseridos.append(arc_Kde)
 
-                    auxVar = self.func(arcos,elem[1])
-                    auxVar = self.func2(auxVar)
+                    auxVar = self.__insertedArcs(arcos,elem[1])
+                    auxVar = self.__probPaths(auxVar)
                     for i in auxVar:
                         myData2 = self.__dataPartition(data, i)
                         h2 = self.__multivariateNewtonRaphson(myData2, initial_h)
-                        arc_Kde2 = self.LOO_Kde(myData2, h2)
+                        arc_Kde2 = self.__LOO_Kde(myData2, h2)
                         
                         auxVar2 = [x for x in i if x != elem[1]]
                         myData3 = []
@@ -668,7 +692,7 @@ class newtonRapson(object):
                         else:
                             myData3 = self.__dataPartition(data, auxVar2)
                             h3 = self.__multivariateNewtonRaphson(myData3, initial_h)
-                            arc_Kde3 = self.LOO_Kde(myData3, h3)
+                            arc_Kde3 = self.__LOO_Kde(myData3, h3)
                         
                         for i in range(len(arc_Kde)):
                             arc_Kde2[i] = arc_Kde2[i]/arc_Kde3[i]
