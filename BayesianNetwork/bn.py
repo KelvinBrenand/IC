@@ -2,6 +2,7 @@
 
 import math
 import copy
+import warnings
 
 class newtonRapson(object):
     '''
@@ -61,29 +62,7 @@ class newtonRapson(object):
         Returns:
             float: The best bandwidth value considering the input data.
             None:  If the method finds a 0 derivative or maximum number of iterations is reached. 
-
-        Error Messages:
-            EXIT_FAIL_INVALID_DATA_TYPE: Input set type must be a list.
-            EXIT_FAIL_INVALID_H_TYPE: The h parameter must be a float.
-            EXIT_FAIL_INVALID_EPSILON_TYPE: The epsilon parameter must be a float.
-            EXIT_FAIL_INVALID_H: The value of the parameter h must be greater than zero.
-            EXIT_FAIL_INVALID_EPSILON: The value of the parameter epsilon must be greater than zero.
         """
-        
-        if not type(data) is list:
-            return "EXIT_FAIL_INVALID_DATA_TYPE"
-
-        if not type(h) is float:
-            return "EXIT_FAIL_INVALID_H_TYPE"
-
-        if not type(epsilon) is float:
-            return "EXIT_FAIL_INVALID_EPSILON_TYPE"
-
-        if h <= 0.0:
-            return "EXIT_FAIL_INVALID_H"
-            
-        if epsilon <= 0.0:
-            return "EXIT_FAIL_INVALID_EPISILON"
 
         MIN_H_VALUE = 0.4
         count = 0
@@ -107,8 +86,7 @@ class newtonRapson(object):
                 h = h-0.1
                 best_h = h
                 if best_h < MIN_H_VALUE:
-                    print("Erro no newtonRaphson")
-                    break
+                    raise RuntimeError("newtonRaphson did not converge")
             else:
                 break
         return best_h
@@ -123,21 +101,7 @@ class newtonRapson(object):
 
         Returns:
             list: KDE of the input data and bandwidth.
-
-        Error Messages:
-            EXIT_FAIL_INVALID_DATA_TYPE: Input set type must be a list.
-            EXIT_FAIL_INVALID_H_TYPE: The h parameter must be a float.
-            EXIT_FAIL_INVALID_H: The value of the parameter h must be greater than zero.
         """
-        
-        if not type(data) is list:
-            return "EXIT_FAIL_INVALID_DATA_TYPE"
-
-        if not type(h) is float:
-            return "EXIT_FAIL_INVALID_H_TYPE"
-
-        if h <= 0.0:
-            return "EXIT_FAIL_INVALID_H"
     
         sum = 0
         for i in range(len(data)):
@@ -289,29 +253,7 @@ class newtonRapson(object):
         Returns:
             float: The best bandwidth value considering the input data.
             None:  If the method finds a 0 derivative or maximum number of iterations is reached.
-
-        Error Messages:
-            EXIT_FAIL_INVALID_DATA_TYPE: Input set type must be a list.
-            EXIT_FAIL_INVALID_H_TYPE: The h parameter must be a float.
-            EXIT_FAIL_INVALID_EPSILON_TYPE: The epsilon parameter must be a float.
-            EXIT_FAIL_INVALID_H: The value of the parameter h must be greater than zero.
-            EXIT_FAIL_INVALID_EPSILON: The value of the parameter epsilon must be greater than zero.
         """
-        
-        if not type(data) is list:
-            return "EXIT_FAIL_INVALID_DATA_TYPE"
-
-        if not type(h) is float:
-            return "EXIT_FAIL_INVALID_H_TYPE"
-
-        if not type(epsilon) is float:
-            return "EXIT_FAIL_INVALID_EPSILON_TYPE"
-
-        if h <= 0.0:
-            return "EXIT_FAIL_INVALID_H"
-            
-        if epsilon <= 0.0:
-            return "EXIT_FAIL_INVALID_EPISILON"
 
         MIN_H_VALUE = 0.4
         count = 0
@@ -335,8 +277,7 @@ class newtonRapson(object):
                 h = h-0.1
                 best_h = h
                 if best_h < MIN_H_VALUE:
-                    print("Erro no multivariateNewtonRaphson")
-                    break
+                    raise RuntimeError("multivariateNewtonRaphson did not converge")
             else:
                 break
         return best_h
@@ -351,22 +292,8 @@ class newtonRapson(object):
 
         Returns:
             list: KDE of the input data and bandwidth.
-
-        Error Messages:
-            EXIT_FAIL_INVALID_DATA_TYPE: Input set type must be a list.
-            EXIT_FAIL_INVALID_H_TYPE: The h parameter must be a float.
-            EXIT_FAIL_INVALID_H: The value of the parameter h must be greater than zero.
         """
-        
-        if not type(data) is list:
-            return "EXIT_FAIL_INVALID_DATA_TYPE"
 
-        if not type(h) is float:
-            return "EXIT_FAIL_INVALID_H_TYPE"
-
-        if h <= 0.0:
-            return "EXIT_FAIL_INVALID_H"
-            
         sum = 0
         for i in range(len(data)):
             sum += self.__multivariateGaussian(self.__listDivision(self.__listSubtraction(x, data[i]), h))
@@ -389,23 +316,16 @@ class newtonRapson(object):
             databkp.pop(i)
             if isinstance(element, float):
                 auxVar[i] = self.__kernelDensityEstimation(element, databkp, h)
+            elif isinstance(element, list):
+                if isinstance(element[0], float):
+                    auxVar[i] = self.__multivariateKernelDensityEstimation(element, databkp, h)
+                else:
+                    raise ValueError("element must be either float or list of floats")
             else:
-                auxVar[i] = self.__multivariateKernelDensityEstimation(element, databkp, h)
+                raise ValueError("element must be either float or list of floats")
             databkp.clear()
             databkp = data.copy()
         return auxVar
-
-    def __column(self, data, i):
-        """Returns a specific column from a N dimensional list.
-
-        Args:
-            data (list): The complete initial list.
-            i (int): The specific column index.
-
-        Returns:
-            list: The specific column of the N dimentional data.
-        """
-        return [row[i] for row in data]
 
     def __pairs(self, n):
         """Returns all possible pairs from 0 up to n. E.g.: For n = 2, it will return [(0,1),(1,0),(0,2),(2,0),(1,2),(2,1)].
@@ -424,22 +344,25 @@ class newtonRapson(object):
         return c
     
     def __dataPartition(self,data,index):
-        """Returns two specific columns from a N dimensional list.
+        """Returns n specific columns from a N dimensional list.
 
         Args:
             data (list): The complete initial list.
-            index (tuple): The specific columns.
+            index (tuple/int): The n specific columns.
 
         Returns:
             list: The specific columns of the N dimentional data.
         """
-        e = []
-        for i in range(len(data)):
-            f = []
-            for j in index:
-                f.append(data[i][j])
-            e.append(f)
-        return e
+        if isinstance(index, int):
+            return [row[index] for row in data]
+        else:
+            e = []
+            for i in range(len(data)):
+                f = []
+                for j in index:
+                    f.append(data[i][j])
+                e.append(f)
+            return e
 
 
     def __mtxModifier(self, mtx, idx):
@@ -562,36 +485,47 @@ class newtonRapson(object):
 
         Returns:
             list: The adjacency matrix associated with data.
+            None: If a RuntimeError happend
         """
+
+        if not type(data) is list:
+            raise TypeError("data must be list")
+
         initial_h = 1.0
         auxVar = 1.0
-        probNoIndiv = {}
+        probs = {}
         adjacency_matrix = [[0 for i in range(len(data[0]))] for n in range(len(data[0]))]
         for i in range (len(data[0])):
-            h = self.__newtonRaphson(self.__column(data, i), initial_h)
-            probNoIndiv.update({(i):self.__LOO_Kde(self.__column(data, i), h)})
+            try:
+                h = self.__newtonRaphson(self.__dataPartition(data, i), initial_h)
+            except RuntimeError:
+                warnings.warn("newtonRaphson did not converge",RuntimeError)
+                return None
+            probs.update({(i):self.__LOO_Kde(self.__dataPartition(data, i), h)})
         auxList = []
         
-        for i in range(len(probNoIndiv.get((0)))):
-            for j in range(len(probNoIndiv)):
-                auxVar = auxVar*probNoIndiv.get((j))[i]
+        for i in range(len(probs.get((0)))):
+            for j in range(len(probs)):
+                auxVar = auxVar*probs.get((j))[i]
             auxList.append(math.log(auxVar))
             auxVar = 1.0
         last_MLE = sum(auxList)
-        print("lastMLE",last_MLE)
 
-        arcos = list(probNoIndiv.keys())
+        arcos = list(probs.keys())
         indices = self.__pairs(len(data[0]))
         indicesCopy = indices.copy() 
         for elem in indices:
             if list(self.__insertedArcs(arcos,elem[1]).values()) == [[]]: 
                 if list(self.__insertedArcs(arcos,elem[0]).values()) == [[]]:
                     myData = self.__dataPartition(data, elem)
-                    h = self.__multivariateNewtonRaphson(myData, initial_h)
+                    try:
+                        h = self.__multivariateNewtonRaphson(myData, initial_h)
+                    except RuntimeError:
+                        warnings.warn("multivariateNewtonRaphson did not converge",RuntimeError)
                     arc_Kde = self.__LOO_Kde(myData, h)
 
                     for i in range(len(arc_Kde)):
-                        arc_Kde[i] = arc_Kde[i]/probNoIndiv.get(elem[0])[i]
+                        arc_Kde[i] = arc_Kde[i]/probs.get(elem[0])[i]
 
                     somaDosArcosInseridos = arc_Kde.copy()
                 
@@ -602,12 +536,18 @@ class newtonRapson(object):
                     somaDosArcosInseridos = []
                     for i in auxVar:
                         myData = self.__dataPartition(data, i)
-                        h = self.__multivariateNewtonRaphson(myData, initial_h)
+                        try:
+                            h = self.__multivariateNewtonRaphson(myData, initial_h)
+                        except RuntimeError:
+                            warnings.warn("multivariateNewtonRaphson did not converge",RuntimeError)
                         arc_Kde = self.__LOO_Kde(myData, h)
 
                         i.append(elem[1])
                         myData2 = self.__dataPartition(data, i)
-                        h2 = self.__multivariateNewtonRaphson(myData2, initial_h)
+                        try:
+                            h2 = self.__multivariateNewtonRaphson(myData2, initial_h)
+                        except RuntimeError:
+                            warnings.warn("multivariateNewtonRaphson did not converge",RuntimeError)
                         arc_Kde2 = self.__LOO_Kde(myData2, h2)
 
                         for i in range(len(arc_Kde)):
@@ -621,11 +561,14 @@ class newtonRapson(object):
             else:
                 if list(self.__insertedArcs(arcos,elem[0]).values()) == [[]]:
                     myData = self.__dataPartition(data, elem)
-                    h = self.__multivariateNewtonRaphson(myData, initial_h)
+                    try:
+                        h = self.__multivariateNewtonRaphson(myData, initial_h)
+                    except RuntimeError:
+                        warnings.warn("multivariateNewtonRaphson did not converge",RuntimeError)
                     arc_Kde = self.__LOO_Kde(myData, h)
 
                     for i in range(len(arc_Kde)):
-                        arc_Kde[i] = arc_Kde[i]/probNoIndiv.get(elem[0])[i]
+                        arc_Kde[i] = arc_Kde[i]/probs.get(elem[0])[i]
 
                     auxVar = self.__insertedArcs(arcos,elem[1])
                     auxVar = self.__probPaths(auxVar)
@@ -633,7 +576,10 @@ class newtonRapson(object):
                     somaDosArcosInseridos = []
                     for i in auxVar:
                         myData2 = self.__dataPartition(data, i)
-                        h2 = self.__multivariateNewtonRaphson(myData2, initial_h)
+                        try:
+                            h2 = self.__multivariateNewtonRaphson(myData2, initial_h)
+                        except RuntimeError:
+                            warnings.warn("multivariateNewtonRaphson did not converge",RuntimeError)
                         arc_Kde2 = self.__LOO_Kde(myData2, h2)
                         
                         auxVar2 = [x for x in i if x != elem[1]]
@@ -641,10 +587,13 @@ class newtonRapson(object):
                         h3 = []
                         arc_Kde3 = []
                         if len(auxVar2) == 1:
-                            arc_Kde3 = probNoIndiv.get(auxVar2[0])
+                            arc_Kde3 = probs.get(auxVar2[0])
                         else:
                             myData3 = self.__dataPartition(data, auxVar2)
-                            h3 = self.__multivariateNewtonRaphson(myData3, initial_h)
+                            try:
+                                h3 = self.__multivariateNewtonRaphson(myData3, initial_h)
+                            except RuntimeError:
+                                warnings.warn("multivariateNewtonRaphson did not converge",RuntimeError)
                             arc_Kde3 = self.__LOO_Kde(myData3, h3)
                         
                         for i in range(len(arc_Kde)):
@@ -664,12 +613,18 @@ class newtonRapson(object):
                     somaDosArcosInseridos = []
                     for i in auxVar:
                         myData = self.__dataPartition(data, i)
-                        h = self.__multivariateNewtonRaphson(myData, initial_h)
+                        try:
+                            h = self.__multivariateNewtonRaphson(myData, initial_h)
+                        except RuntimeError:
+                            warnings.warn("multivariateNewtonRaphson did not converge",RuntimeError)
                         arc_Kde = self.__LOO_Kde(myData, h)
 
                         i.append(elem[1])
                         myData2 = self.__dataPartition(data, i)
-                        h2 = self.__multivariateNewtonRaphson(myData2, initial_h)
+                        try:
+                            h2 = self.__multivariateNewtonRaphson(myData2, initial_h)
+                        except RuntimeError:
+                            warnings.warn("multivariateNewtonRaphson did not converge",RuntimeError)
                         arc_Kde2 = self.__LOO_Kde(myData2, h2)
 
                         for i in range(len(arc_Kde)):
@@ -680,7 +635,10 @@ class newtonRapson(object):
                     auxVar = self.__probPaths(auxVar)
                     for i in auxVar:
                         myData2 = self.__dataPartition(data, i)
-                        h2 = self.__multivariateNewtonRaphson(myData2, initial_h)
+                        try:
+                            h2 = self.__multivariateNewtonRaphson(myData2, initial_h)
+                        except RuntimeError:
+                            warnings.warn("multivariateNewtonRaphson did not converge",RuntimeError)
                         arc_Kde2 = self.__LOO_Kde(myData2, h2)
                         
                         auxVar2 = [x for x in i if x != elem[1]]
@@ -688,10 +646,13 @@ class newtonRapson(object):
                         h3 = []
                         arc_Kde3 = []
                         if len(auxVar2) == 1:
-                            arc_Kde3 = probNoIndiv.get(auxVar2[0])
+                            arc_Kde3 = probs.get(auxVar2[0])
                         else:
                             myData3 = self.__dataPartition(data, auxVar2)
-                            h3 = self.__multivariateNewtonRaphson(myData3, initial_h)
+                            try:
+                                h3 = self.__multivariateNewtonRaphson(myData3, initial_h)
+                            except RuntimeError:
+                                warnings.warn("multivariateNewtonRaphson did not converge",RuntimeError)
                             arc_Kde3 = self.__LOO_Kde(myData3, h3)
                         
                         for i in range(len(arc_Kde)):
@@ -716,7 +677,7 @@ class newtonRapson(object):
                 mtxCopy = self.__mtxModifier(mtxCopy,indicePar0)
                 mlePar0 = None
                 if not self.__cycle(mtxCopy):
-                    auxDictPar0 = probNoIndiv.copy()
+                    auxDictPar0 = probs.copy()
                     auxDictPar0.update({indicePar0[1]:resultadoPar0})
                     mlePar0 = []
                     for i in range(len(auxDictPar0.get(list(auxDictPar0.keys())[0]))):
@@ -730,7 +691,7 @@ class newtonRapson(object):
                 mtxCopy = self.__mtxModifier(mtxCopy,indicePar1)
                 mlePar1 = None
                 if not self.__cycle(mtxCopy):
-                    auxDictPar1 = probNoIndiv.copy()
+                    auxDictPar1 = probs.copy()
                     auxDictPar1.update({indicePar1[1]:resultadoPar1})
                     mlePar1 = []
                     for i in range(len(auxDictPar1.get(list(auxDictPar1.keys())[0]))):
@@ -741,20 +702,17 @@ class newtonRapson(object):
                     mlePar1 = sum(mlePar1)
 
                 if mlePar0 != None and mlePar1 != None:
-                    print("mlePar0",mlePar0)
-                    print("mlePar1",mlePar1)
                     if mlePar0 > mlePar1:
                         if mlePar0 > last_MLE:
                             last_MLE = mlePar0
                             adjacency_matrix = self.__mtxModifier(adjacency_matrix, indicePar0)
-                            probNoIndiv = auxDictPar0.copy()
+                            probs = auxDictPar0.copy()
                             arcos.append(indicePar0) 
                     else:
                         if mlePar1 > last_MLE:
                             last_MLE = mlePar1
                             adjacency_matrix = self.__mtxModifier(adjacency_matrix, indicePar1)
-                            probNoIndiv = auxDictPar1.copy()
+                            probs = auxDictPar1.copy()
                             arcos.append(indicePar1)
-                    print("lastMLE", last_MLE)
 
         return adjacency_matrix
