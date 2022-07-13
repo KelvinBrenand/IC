@@ -523,34 +523,36 @@ class newtonRapson(object):
         
         if len(myList1) == 1:
             return myList1
-        else:
-            mylist3 = myList1.copy()
-            myList2 = []
-            while mylist3 != []:
-                myList4 = []
-                myList4.clear()
-                teste = mylist3[0]
-                mylist3.remove(teste)
-                if mylist3 == []:
-                    break
-                for j in mylist3:
-                    if teste[-1] == j[0]:
-                        aux = teste.copy()
-                        aux.append(j[1])
-                        myList2.append(aux)
-                        myList4.append(j)
-                for m in myList4:
-                    mylist3.remove(m)
-                
-            mylist3 = myList1.copy()
-            for i in myList2:
-                for j in mylist3:
-                    if i[-1] == j[0]:
-                        i.append(j[1])
-            if myList2 == []:
-                return myList1
-            else:
-                return myList2
+        myList2 = []
+        for i in myList1:
+            flag = True
+            for j in myList1:
+                if i[-1] == j[0]:
+                    flag = False
+                    aux = i.copy()
+                    aux.append(j[1])
+                    myList2.append(aux)
+            if flag:
+                    myList2.append(i)
+        myList3 = myList2.copy()
+        for i in myList2:
+            for j in myList2:
+                if i[1] == j[0]:
+                    try:
+                        myList3.remove(j)
+                    except:
+                        pass
+        for i in myList3:
+            for j in myList1:
+                if i[-1] == j[0]:
+                    aux = i.copy()
+                    aux.append(j[1])
+                    try:
+                        myList3.remove(i)
+                    except:
+                        pass
+                    myList3.append(aux)
+        return myList3
 
     def MLE(self,data):
         """Computes the Maximum-Likelihood Estimation (MLE) of data and returns the adjacency matrix.
