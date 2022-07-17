@@ -1,8 +1,10 @@
 # Author: Kelvin Brenand <brenand.kelvin@gmail.com>
 
+from distutils.util import convert_path
 import math
 import copy
 import warnings
+import random
 
 class newtonRapson(object):
     '''
@@ -51,7 +53,7 @@ class newtonRapson(object):
     
     def __newtonRaphson(self, data, h=1.0, epsilon=0.01, max_iter=20):
         """Performs the Newton-Raphson's method to estimate the best value to the Kernel Density Estimation (KDE) bandwidth parameter.
-           If it does not converge with the initial h value, the method will be executed again with the a new h value (h = h-1.0) until MIN_H_VALUE is reached. 
+           If it does not converge with the initial h value, the method will be executed again with the a new h value until MAX_CONV_ATTEMPTS is reached. 
 
         Args:
             data (list): Datapoints to estimate from.
@@ -67,32 +69,40 @@ class newtonRapson(object):
             None:  If the method finds a 0 derivative or maximum number of iterations is reached. 
         """
 
-        MIN_H_VALUE = 0.4
+        hValues = []
+        hValues.append(h)
+        MAX_CONV_ATTEMPTS = 10
+        convAttempt = 0
         count = 0
-        best_h = h
-        funcReturn = self.__fracResult(data, best_h)
+        funcReturn = self.__fracResult(data, h)
         frac = funcReturn[0]/funcReturn[1]
         while True:
             while abs(frac) >= epsilon:
-                funcReturn = self.__fracResult(data, best_h)
+                funcReturn = self.__fracResult(data, h)
                 if funcReturn[1] == 0:
-                    best_h = None
+                    h = None
                     break
                 frac = funcReturn[0]/funcReturn[1]
-                best_h = best_h - frac
+                h = h - frac
                 count = count+1
                 if count >= max_iter:
-                    best_h = None
+                    h = None
                     count = 0
                     break
-            if best_h == None or best_h < 0:
-                h = h-0.1
-                best_h = h
-                if best_h < MIN_H_VALUE:
+            if h == None or h < 0:
+                while True:
+                    h = round(random.uniform(0.4, 1.5),1)
+                    try:
+                        hValues.index(h)
+                    except:
+                        hValues.append(h)
+                        break
+                convAttempt += 1
+                if convAttempt > MAX_CONV_ATTEMPTS:
                     raise RuntimeError("newtonRaphson did not converge")
             else:
                 break
-        return best_h
+        return h
     
     def __kernelDensityEstimation(self, x, data, h):
         """Computes the Kernel Density Estimation (KDE) using the gaussian kernel and the Leave-One-Out technique of the given datapoints and bandwidth parameter.
@@ -245,7 +255,7 @@ class newtonRapson(object):
     
     def __multivariateNewtonRaphson(self, data, h=1.0, epsilon=0.01, max_iter=20):
         """Performs the Multivariate Newton-Raphson's method to estimate the best value to the Multivariate Kernel Density Estimation (MKDE) bandwidth parameter.
-           If it does not converge with the initial h value, the method will be executed again with the a new h value (h = h-1.0) until MIN_H_VALUE is reached.
+           If it does not converge with the initial h value, the method will be executed again with the a new h value until MAX_CONV_ATTEMPTS is reached.
 
         Args:
             data (list): Datapoints to estimate from.
@@ -261,32 +271,40 @@ class newtonRapson(object):
             None:  If the method finds a 0 derivative or maximum number of iterations is reached.
         """
 
-        MIN_H_VALUE = 0.4
+        hValues = []
+        hValues.append(h)
+        MAX_CONV_ATTEMPTS = 10
+        convAttempt = 0
         count = 0
-        best_h = h
-        funcReturn = self.__multivariateFracResult(data, best_h)
+        funcReturn = self.__multivariateFracResult(data, h)
         frac = funcReturn[0]/funcReturn[1]
         while True:
             while abs(frac) >= epsilon:
-                funcReturn = self.__multivariateFracResult(data, best_h)
+                funcReturn = self.__multivariateFracResult(data, h)
                 if funcReturn[1] == 0:
-                    best_h = None
+                    h = None
                     break
                 frac = funcReturn[0]/funcReturn[1]
-                best_h = best_h - frac
+                h = h - frac
                 count = count+1
                 if count >= max_iter:
-                    best_h = None
+                    h = None
                     count = 0
                     break
-            if best_h == None or best_h < 0:
-                h = h-0.1
-                best_h = h
-                if best_h < MIN_H_VALUE:
+            if h == None or h < 0:
+                while True:
+                    h = round(random.uniform(0.4, 1.5),1)
+                    try:
+                        hValues.index(h)
+                    except:
+                        hValues.append(h)
+                        break
+                convAttempt += 1
+                if convAttempt > MAX_CONV_ATTEMPTS:
                     raise RuntimeError("multivariateNewtonRaphson did not converge")
             else:
                 break
-        return best_h
+        return h
 
     def __multivariateKernelDensityEstimation(self, x, data, h):
         """Computes the Multivariate Kernel Density Estimation (MKDE) using the multivariate gaussian kernel and the Leave-One-Out technique of the given datapoints and bandwidth parameter.
