@@ -47,8 +47,14 @@ class newtonRapson(object):
             databkp = data.copy()
             sumTop = sum(top)
             sumBottom = sum(bottom)
-            resultFirstDer.append(sumTop/(sumBottom*h*h*h))
-            resultSecDer.append((sumTop*-3)/(sumBottom*h*h*h*h))
+            denom1 = sumBottom*h*h*h
+            if denom1 == 0:
+                denom1 = 0.001
+            denom2 = sumBottom*h*h*h*h
+            if denom2 == 0:
+                denom2 = 0.001
+            resultFirstDer.append(sumTop/denom1)
+            resultSecDer.append((sumTop*-3)/denom2)
         return sum(resultFirstDer)-(len(data)/h), sum(resultSecDer)+(len(data)/(h*h))
     
     def __newtonRaphson(self, data, h=1.0, epsilon=0.01, max_iter=20):
@@ -544,6 +550,8 @@ class newtonRapson(object):
         for i in range(len(probs.get((0)))):
             for j in range(len(probs)):
                 auxVar = auxVar*probs.get((j))[i]
+                if auxVar == 0:
+                    auxVar = 0.001
             auxList.append(math.log(auxVar))
             auxVar = 1.0
         last_MLE = sum(auxList)
@@ -557,6 +565,9 @@ class newtonRapson(object):
                     arc_Kde = self.__LOO_Kde(data, elem)
                     if arc_Kde == None: return None
                     for i in range(len(arc_Kde)):
+                        denom = probs.get(elem[0])[i]
+                        if denom == 0:
+                            denom = 0.001
                         arc_Kde[i] = arc_Kde[i]/probs.get(elem[0])[i]
                     somaDosArcosInseridos = arc_Kde.copy()
                 
