@@ -1,10 +1,7 @@
 # Author: Kelvin Brenand <brenand.kelvin@gmail.com>
 
-from distutils.util import convert_path
 import math
 import copy
-import warnings
-import random
 
 class newtonRapson(object):
     '''
@@ -20,95 +17,6 @@ class newtonRapson(object):
             float: Gaussian kernel of the input value.
         """
         return ((1/math.sqrt(2*math.pi))*math.exp(-0.5*(x**2)))
-
-    def __fracResult(self, data, h):
-        """Function that performs the Newton-Raphson's method calculations using the Leave-One-Out technique.
-
-        Args:
-            data (list): Datapoints to estimate from.
-            h (float): Bandwidth parameter.
-
-        Returns:
-            tuple: Tuple consisting of the numerator and denominator of the fraction present in Newton-Raphson's method.
-        """
-        resultFirstDer = []
-        resultSecDer = []
-        databkp = data.copy()
-        for i in range(len(data)):
-            top = []
-            bottom = []
-            element = databkp[i]
-            databkp.pop(i)
-            for j in range(len(databkp)):
-                varAux = self.__gaussian((element - databkp[j])/h)
-                top.append(varAux*(element - databkp[j])*(element - databkp[j]))
-                bottom.append(varAux)
-            databkp.clear()
-            databkp = data.copy()
-            sumTop = sum(top)
-            sumBottom = sum(bottom)
-            denom1 = sumBottom*h*h*h
-            if denom1 == 0:
-                denom1 = 0.001
-            denom2 = sumBottom*h*h*h*h
-            if denom2 == 0:
-                denom2 = 0.001
-            resultFirstDer.append(sumTop/denom1)
-            resultSecDer.append((sumTop*-3)/denom2)
-        return sum(resultFirstDer)-(len(data)/h), sum(resultSecDer)+(len(data)/(h*h))
-    
-    def __newtonRaphson(self, data, h=1.0, epsilon=0.01, max_iter=20):
-        """Performs the Newton-Raphson's method to estimate the best value to the Kernel Density Estimation (KDE) bandwidth parameter.
-           If it does not converge with the initial h value, the method will be executed again with the a new h value until MAX_CONV_ATTEMPTS is reached. 
-
-        Args:
-            data (list): Datapoints to estimate from.
-            h (float): Initial bandwidth value, default=1.0.
-            epsilon(float): The method's threshold, defaut=0.01.
-            max_iter(int): Maximum number of iterations.
-
-        Raises:
-            RuntimeError: newtonRaphson did not converge
-
-        Returns:
-            float: The best bandwidth value considering the input data.
-            None:  If the method finds a 0 derivative or maximum number of iterations is reached. 
-        """
-
-        hValues = []
-        hValues.append(h)
-        MAX_CONV_ATTEMPTS = 10
-        convAttempt = 0
-        count = 0
-        funcReturn = self.__fracResult(data, h)
-        frac = funcReturn[0]/funcReturn[1]
-        while True:
-            while abs(frac) >= epsilon:
-                funcReturn = self.__fracResult(data, h)
-                if funcReturn[1] == 0:
-                    h = None
-                    break
-                frac = funcReturn[0]/funcReturn[1]
-                h = h - frac
-                count = count+1
-                if count >= max_iter:
-                    h = None
-                    count = 0
-                    break
-            if h == None or h < 0:
-                while True:
-                    h = round(random.uniform(0.4, 1.5),1)
-                    try:
-                        hValues.index(h)
-                    except:
-                        hValues.append(h)
-                        break
-                convAttempt += 1
-                if convAttempt > MAX_CONV_ATTEMPTS:
-                    raise RuntimeError("newtonRaphson did not converge")
-            else:
-                break
-        return h
     
     def __kernelDensityEstimation(self, x, data, h):
         """Computes the Kernel Density Estimation (KDE) using the gaussian kernel and the Leave-One-Out technique of the given datapoints and bandwidth parameter.
@@ -228,90 +136,7 @@ class newtonRapson(object):
         idenMatrixInv = H
         return ((2*math.pi)**(-self.__ndim(x)/2))*((idenMatrixDet)**(-0.5))*(math.exp(-0.5*self.__dot(self.__dot(x, idenMatrixInv), x)))
     
-    def __multivariateFracResult(self, data, h):
-        """Function that performs the Mutivariate Newton-Raphson's method calculations using the Leave-One-Out technique.
-
-        Args:
-            data (list): Datapoints to estimate from.
-            h (float): Bandwidth parameter.
-
-        Returns:
-            tuple: Tuple consisting of the numerator and denominator of the fraction present in Newton-Raphson's method.
-        """
-        H = self.__identityMatrix(self.__ndim(data))
-        idenMatrixInv = H
-        resultFirstDer = []
-        resultSecDer = []
-        databkp = data.copy()
-        for i in range(len(data)):
-            top = []
-            bottom = []
-            element = databkp[i]
-            databkp.pop(i)
-            for j in range(len(databkp)):
-                varAux = self.__multivariateGaussian(self.__listDivision(self.__listSubtraction(element, databkp[j]), h))
-                top.append(varAux*(1/(h*h*h))*self.__dot(self.__dot(self.__listSubtraction(element, databkp[j]), idenMatrixInv), self.__listSubtraction(element, databkp[j])))
-                bottom.append(varAux)
-            databkp = data.copy()
-            sumTop = sum(top)
-            sumBottom = sum(bottom)
-            resultFirstDer.append(sumTop/sumBottom)
-            resultSecDer.append((sumTop*-3)/(sumBottom*h*h*h*h))
-        return sum(resultFirstDer)-(len(data)*self.__ndim(data)/h), sum(resultSecDer)+(len(data)*self.__ndim(data)/(h*h))
     
-    def __multivariateNewtonRaphson(self, data, h=1.0, epsilon=0.01, max_iter=20):
-        """Performs the Multivariate Newton-Raphson's method to estimate the best value to the Multivariate Kernel Density Estimation (MKDE) bandwidth parameter.
-           If it does not converge with the initial h value, the method will be executed again with the a new h value until MAX_CONV_ATTEMPTS is reached.
-
-        Args:
-            data (list): Datapoints to estimate from.
-            h (float): Initial bandwidth value, default=1.0.
-            epsilon(float): The method's threshold, defaut=0.01.
-            max_iter(int): Maximum number of iterations.
-
-        Raises:
-            RuntimeError: multivariateNewtonRaphson did not converge
-
-        Returns:
-            float: The best bandwidth value considering the input data.
-            None:  If the method finds a 0 derivative or maximum number of iterations is reached.
-        """
-
-        hValues = []
-        hValues.append(h)
-        MAX_CONV_ATTEMPTS = 10
-        convAttempt = 0
-        count = 0
-        funcReturn = self.__multivariateFracResult(data, h)
-        frac = funcReturn[0]/funcReturn[1]
-        while True:
-            while abs(frac) >= epsilon:
-                funcReturn = self.__multivariateFracResult(data, h)
-                if funcReturn[1] == 0:
-                    h = None
-                    break
-                frac = funcReturn[0]/funcReturn[1]
-                h = h - frac
-                count = count+1
-                if count >= max_iter:
-                    h = None
-                    count = 0
-                    break
-            if h == None or h < 0:
-                while True:
-                    h = round(random.uniform(0.4, 1.5),1)
-                    try:
-                        hValues.index(h)
-                    except:
-                        hValues.append(h)
-                        break
-                convAttempt += 1
-                if convAttempt > MAX_CONV_ATTEMPTS:
-                    raise RuntimeError("multivariateNewtonRaphson did not converge")
-            else:
-                break
-        return h
-
     def __multivariateKernelDensityEstimation(self, x, data, h):
         """Computes the Multivariate Kernel Density Estimation (MKDE) using the multivariate gaussian kernel and the Leave-One-Out technique of the given datapoints and bandwidth parameter.
 
@@ -344,32 +169,25 @@ class newtonRapson(object):
             None: If a RuntimeError happend
         """
         myData = self.__dataPartition(data, index)
-        try:
-            if isinstance(myData[0],list):
-                if isinstance(myData[0][0],float):
-                    h = self.__multivariateNewtonRaphson(myData)
-                else:
-                    raise ValueError("element must be either float or list of floats")
-            elif isinstance(myData[0],float):
-                h = self.__newtonRaphson(myData)
-            else:
-                raise ValueError("element must be either float or list of floats")
-        except RuntimeError:
-            warnings.warn("bandwidth estimator method did not converge",RuntimeWarning)
-            return None
-        
-        auxVar = [None] * len(myData)
-        databkp = myData.copy()
-        for i in range(len(myData)):
-            element = databkp[i]
-            databkp.pop(i)
-            if isinstance(element, float):
-                auxVar[i] = self.__kernelDensityEstimation(element, databkp, h)
-            else:
-                auxVar[i] = self.__multivariateKernelDensityEstimation(element, databkp, h)
-            databkp.clear()
+        hs = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0] #Falta modificar isso para a função das distancias
+        logsAndKdes = {}
+        for h in hs:
+            kde = []
             databkp = myData.copy()
-        return auxVar
+            for i in range(len(myData)):
+                element = databkp[i]
+                databkp.pop(i)
+                if isinstance(element, float):
+                    kde.append(self.__kernelDensityEstimation(element, databkp, h))
+                else:
+                    kde.append(self.__multivariateKernelDensityEstimation(element, databkp, h))
+                databkp.clear()
+                databkp = myData.copy()
+            log = []
+            for i in range(len(kde)):
+                log.append(math.log(kde[i]))
+            logsAndKdes.update({sum(log):kde})
+        return logsAndKdes.get(max(logsAndKdes))
 
     def __pairs(self, n):
         """Returns all possible pairs from 0 up to n. E.g.: For n = 2, it will return [(0,1),(1,0),(0,2),(2,0),(1,2),(2,1)].
@@ -568,7 +386,7 @@ class newtonRapson(object):
                         denom = probs.get(elem[0])[i]
                         if denom == 0:
                             denom = 0.001
-                        arc_Kde[i] = arc_Kde[i]/probs.get(elem[0])[i]
+                        arc_Kde[i] = arc_Kde[i]/denom
                     somaDosArcosInseridos = arc_Kde.copy()
                 
                 else:
