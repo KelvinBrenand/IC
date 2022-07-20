@@ -1,17 +1,17 @@
 from sklearn import datasets
-from bn import bayesianNetwork
+from bn import BayesianNetwork
 import numpy as np
 
-obj = bayesianNetwork()
-#data = datasets.load_iris().data[:,:4]
-#print("Input shape: ",data.shape)
-#print(np.array(obj.MLE(data.tolist())))
-
 data1 = datasets.load_iris().data[:50,:]
-print(np.array(obj.MLE(data1.tolist())))
+bn1 = BayesianNetwork(data1)
+bn1.fit()
+print(bn1.graphProbabilities())
+print(np.array(bn1.adjacencyMatrix()))
+#bn1.save('model.pkl')
+#bn1 = BayesianNetwork.load('model.pkl')
 
-data1 = datasets.load_iris().data[50:100,:]
-print(np.array(obj.MLE(data1.tolist())))
+#data2 = datasets.load_iris().data[50:100,:]
+#bn2 = BayesianNetwork(data2)
 
-data1 = datasets.load_iris().data[100:,:]
-print(np.array(obj.MLE(data1.tolist())))
+#data3 = datasets.load_iris().data[100:,:]
+#bn3 = BayesianNetwork(data3)

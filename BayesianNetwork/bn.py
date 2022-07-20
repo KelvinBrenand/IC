@@ -3,11 +3,18 @@
 import math
 import copy
 import random
+import pickle as pkl
 
-class bayesianNetwork(object):
+class BayesianNetwork(object):
     '''
     This class implements the 1D and nD Newton-Raphson's bandwidth estimator method, its helping methods, and the 1D and nD Kernel Density Estimation method.
     '''
+    
+    def __init__(self, data):
+        self.data = data
+        self._graphProbabilities = {}
+        self._adjacencyMatrix = []
+
     def __gaussian(self, x):
         """Computes the gaussian kernel of a given value.
 
@@ -137,7 +144,6 @@ class bayesianNetwork(object):
         idenMatrixInv = H
         return ((2*math.pi)**(-self.__ndim(x)/2))*((idenMatrixDet)**(-0.5))*(math.exp(-0.5*self.__dot(self.__dot(x, idenMatrixInv), x)))
     
-    
     def __multivariateKernelDensityEstimation(self, x, data, h):
         """Computes the Multivariate Kernel Density Estimation (MKDE) using the multivariate gaussian kernel and the Leave-One-Out technique of the given datapoints and bandwidth parameter.
 
@@ -155,8 +161,8 @@ class bayesianNetwork(object):
             sum += self.__multivariateGaussian(self.__listDivision(self.__listSubtraction(x, data[i]), h))
         return (sum/(len(data)*h**self.__ndim(x)))
 
-    def __intervaloH(self, data):
-        """Computes the right endpoint of the interval of values h can assume. The other endpoint is 0.1
+    def __intervalH(self, data):
+        """Computes the right endpoint of the interval of values h can assume. The other endpoint is 0.1.
 
         Args:
             data (List): Datapoints to compute the interval from.
@@ -186,11 +192,10 @@ class bayesianNetwork(object):
 
         Returns:
             list: KDE of myData and bandwidth h.
-            None: If a RuntimeError happend
         """
         myData = self.__dataPartition(data, index)
-        rightEndpoint = self.__intervaloH(myData)
-        hs = {round(random.uniform(0.1, rightEndpoint),1) for x in range(num_h)} #Falta modificar isso para a função das distancias
+        rightEndpoint = self.__intervalH(myData)
+        hs = {round(random.uniform(0.1, rightEndpoint),1) for x in range(num_h)}
         logsAndKdes = {}
         for h in hs:
             kde = []
@@ -247,7 +252,6 @@ class bayesianNetwork(object):
                 e.append(f)
             return e
 
-
     def __mtxModifier(self, mtx, idx):
         """Modifies the adjacency matrix that will be returned by the MLE method.
 
@@ -292,11 +296,11 @@ class bayesianNetwork(object):
         """Returns a dictionary with all nodes associated to elem.
 
         Args:
-            arcos (list): List with all the nodes and all the arcs
+            arcos (list): List with all the nodes and all the arcs.
             elem (int): Target node
 
         Returns:
-            dictionary: All nodes associated to elem
+            dictionary: All nodes associated to elem.
         """
         retorno = {}
         aux = []
@@ -313,7 +317,7 @@ class bayesianNetwork(object):
         """All the necessary ways to calculate the probability of a node.
 
         Args:
-            arcs (dictionary): All nodes associated to a target node
+            arcs (dictionary): All nodes associated to a target node.
 
         Returns:
             list: All probability paths associated with a target node.
@@ -360,7 +364,7 @@ class bayesianNetwork(object):
                     myList3.append(aux)
         return myList3
 
-    def MLE(self,data, num_h=100):
+    def fit(self, num_h=100):
         """Computes the Maximum-Likelihood Estimation (MLE) of data and returns the adjacency matrix.
 
         Args:
@@ -368,21 +372,21 @@ class bayesianNetwork(object):
             num_h (int): The amount of h to be used to compute the best KDE. 
 
         Raises:
-            TypeError: data must be list
+            TypeError: data must be list.
 
         Returns:
             list: The adjacency matrix associated with data.
-            None: If a RuntimeError happend
+            None: If a RuntimeError happend.
         """
 
-        if not type(data) is list:
+        if not type(self.data) is list:
             raise TypeError("data must be list")
 
         auxVar = 1.0
         probs = {}
-        adjacency_matrix = [[0 for i in range(len(data[0]))] for n in range(len(data[0]))]
-        for i in range (len(data[0])):
-            nodeKde = self.__LOO_Kde(data, i, num_h)
+        adjacency_matrix = [[0 for i in range(len(self.data[0]))] for n in range(len(self.data[0]))]
+        for i in range (len(self.data[0])):
+            nodeKde = self.__LOO_Kde(self.data, i, num_h)
             if nodeKde == None: return None
             probs.update({(i):nodeKde})
         auxList = []
@@ -397,12 +401,12 @@ class bayesianNetwork(object):
         last_MLE = sum(auxList)
 
         arcos = list(probs.keys())
-        indices = self.__pairs(len(data[0]))
+        indices = self.__pairs(len(self.data[0]))
         indicesCopy = indices.copy() 
         for elem in indices:
             if list(self.__insertedArcs(arcos,elem[1]).values()) == [[]]: 
                 if list(self.__insertedArcs(arcos,elem[0]).values()) == [[]]:
-                    arc_Kde = self.__LOO_Kde(data, elem, num_h)
+                    arc_Kde = self.__LOO_Kde(self.data, elem, num_h)
                     if arc_Kde == None: return None
                     for i in range(len(arc_Kde)):
                         denom = probs.get(elem[0])[i]
@@ -417,10 +421,10 @@ class bayesianNetwork(object):
                     arcosInseridos = []
                     somaDosArcosInseridos = []
                     for i in auxVar:
-                        arc_Kde = self.__LOO_Kde(data, i, num_h)
+                        arc_Kde = self.__LOO_Kde(self.data, i, num_h)
                         if arc_Kde == None: return None
                         i.append(elem[1])
-                        arc_Kde2 = self.__LOO_Kde(data, i, num_h)
+                        arc_Kde2 = self.__LOO_Kde(self.data, i, num_h)
                         if arc_Kde2 == None: return None
                         for i in range(len(arc_Kde)):
                             arc_Kde[i] = arc_Kde2[i]/arc_Kde[i]
@@ -432,7 +436,7 @@ class bayesianNetwork(object):
                             somaDosArcosInseridos[i] = somaDosArcosInseridos[i]+arcosInseridos[j][i]
             else:
                 if list(self.__insertedArcs(arcos,elem[0]).values()) == [[]]:
-                    arc_Kde = self.__LOO_Kde(data, elem, num_h)
+                    arc_Kde = self.__LOO_Kde(self.data, elem, num_h)
                     if arc_Kde == None: return None
                     for i in range(len(arc_Kde)):
                         arc_Kde[i] = arc_Kde[i]/probs.get(elem[0])[i]
@@ -442,14 +446,14 @@ class bayesianNetwork(object):
                     arcosJaInseridosEmNoAlvo = []
                     somaDosArcosInseridos = []
                     for i in auxVar:
-                        arc_Kde2 = self.__LOO_Kde(data, i, num_h)
+                        arc_Kde2 = self.__LOO_Kde(self.data, i, num_h)
                         if arc_Kde2 == None: return None
                         auxVar2 = [x for x in i if x != elem[1]]
                         arc_Kde3 = []
                         if len(auxVar2) == 1:
                             arc_Kde3 = probs.get(auxVar2[0])
                         else:
-                            arc_Kde3 = self.__LOO_Kde(data, auxVar2, num_h)
+                            arc_Kde3 = self.__LOO_Kde(self.data, auxVar2, num_h)
                             if arc_Kde3 == None: return None
                         for i in range(len(arc_Kde)):
                             arc_Kde2[i] = arc_Kde2[i]/arc_Kde3[i]
@@ -467,10 +471,10 @@ class bayesianNetwork(object):
                     arcosInseridos = []
                     somaDosArcosInseridos = []
                     for i in auxVar:
-                        arc_Kde = self.__LOO_Kde(data, i, num_h)
+                        arc_Kde = self.__LOO_Kde(self.data, i, num_h)
                         if arc_Kde == None: return None
                         i.append(elem[1])
-                        arc_Kde2 = self.__LOO_Kde(data, i, num_h)
+                        arc_Kde2 = self.__LOO_Kde(self.data, i, num_h)
                         if arc_Kde2 == None: return None
                         for i in range(len(arc_Kde)):
                             arc_Kde[i] = arc_Kde2[i]/arc_Kde[i]
@@ -479,14 +483,14 @@ class bayesianNetwork(object):
                     auxVar = self.__insertedArcs(arcos,elem[1])
                     auxVar = self.__probPaths(auxVar)
                     for i in auxVar:
-                        arc_Kde2 = self.__LOO_Kde(data, i, num_h)
+                        arc_Kde2 = self.__LOO_Kde(self.data, i, num_h)
                         if arc_Kde2 == None: return None
                         auxVar2 = [x for x in i if x != elem[1]]
                         arc_Kde3 = []
                         if len(auxVar2) == 1:
                             arc_Kde3 = probs.get(auxVar2[0])
                         else:
-                            arc_Kde3 = self.__LOO_Kde(data, auxVar2, num_h)
+                            arc_Kde3 = self.__LOO_Kde(self.data, auxVar2, num_h)
                             if arc_Kde3 == None: return None
                         for i in range(len(arc_Kde)):
                             arc_Kde2[i] = arc_Kde2[i]/arc_Kde3[i]
@@ -546,5 +550,42 @@ class bayesianNetwork(object):
                             adjacency_matrix = self.__mtxModifier(adjacency_matrix, indicePar1)
                             probs = auxDictPar1.copy()
                             arcos.append(indicePar1)
+        self.graphProbabilities = probs
+        self.adjacencyMatrix = adjacency_matrix
 
-        return adjacency_matrix
+    @property
+    def graphProbabilities(self):
+        """Returns all the probabilities of the graph.
+
+        Returns:
+            dictionary: The probabilities of the graph.
+        """
+        return self._graphProbabilities
+
+    @property
+    def adjacencyMatrix(self):
+        """Returns the adjacency Matrix of the graph.
+
+        Returns:
+            list: the adjacency Matrix of the graph
+        """
+        return self._adjacencyMatrix
+
+    def save(self, file_path):
+        """Saves the network model into a file
+
+        Args:
+            file_path (string): The path of the file
+        """
+        pkl.dump(self,open(file_path,'wb'),-1)
+
+    def load(file_path):
+        """Loads the network model from a file
+
+        Args:
+            file_path (string): The path of the file
+
+        Returns:
+            BayesianNetwork: An object of the BayesianNetwork class
+        """
+        return pkl.load(open(file_path, 'rb'))
