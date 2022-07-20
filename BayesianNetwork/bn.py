@@ -2,8 +2,9 @@
 
 import math
 import copy
+import random
 
-class newtonRapson(object):
+class bayesianNetwork(object):
     '''
     This class implements the 1D and nD Newton-Raphson's bandwidth estimator method, its helping methods, and the 1D and nD Kernel Density Estimation method.
     '''
@@ -154,22 +155,42 @@ class newtonRapson(object):
             sum += self.__multivariateGaussian(self.__listDivision(self.__listSubtraction(x, data[i]), h))
         return (sum/(len(data)*h**self.__ndim(x)))
 
-    def __LOO_Kde(self, data, index):
+    def __intervaloH(self, data):
+        """Computes the right endpoint of the interval of values h can assume. The other endpoint is 0.1
+
+        Args:
+            data (List): Datapoints to compute the interval from.
+
+        Returns:
+            float: The right endpoint.
+        """
+        menDistPontos = []
+        for i in data:
+            distPonto = []
+            for j in data:
+                if i == j: continue
+                if isinstance(i, float):
+                    distPonto.append(math.dist([i],[j]))
+                else:
+                    distPonto.append(math.dist(i,j))
+            menDistPontos.append(min(distPonto))
+        return max(menDistPontos)
+
+    def __LOO_Kde(self, data, index, num_h):
         """Performs the bandwidth estimation and the Leave-One-Out KDE for either the 1D KDE or the Multivariate KDE.
 
         Args:
             data (List): Datapoints to compute the KDE from.
-            index (tuple/int): The index of comlumns to use in the data partition method 
-
-        Raises:
-            ValueError: element must be either float or list of floats
+            index (tuple/int): The index of comlumns to use in the data partition method.
+            num_h (int): The amount of h to be used to compute the best KDE. 
 
         Returns:
             list: KDE of myData and bandwidth h.
             None: If a RuntimeError happend
         """
         myData = self.__dataPartition(data, index)
-        hs = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0] #Falta modificar isso para a função das distancias
+        rightEndpoint = self.__intervaloH(myData)
+        hs = {round(random.uniform(0.1, rightEndpoint),1) for x in range(num_h)} #Falta modificar isso para a função das distancias
         logsAndKdes = {}
         for h in hs:
             kde = []
@@ -339,11 +360,12 @@ class newtonRapson(object):
                     myList3.append(aux)
         return myList3
 
-    def MLE(self,data):
+    def MLE(self,data, num_h=100):
         """Computes the Maximum-Likelihood Estimation (MLE) of data and returns the adjacency matrix.
 
         Args:
             data (list): Datapoints to compute the MLE from.
+            num_h (int): The amount of h to be used to compute the best KDE. 
 
         Raises:
             TypeError: data must be list
@@ -360,7 +382,7 @@ class newtonRapson(object):
         probs = {}
         adjacency_matrix = [[0 for i in range(len(data[0]))] for n in range(len(data[0]))]
         for i in range (len(data[0])):
-            nodeKde = self.__LOO_Kde(data, i)
+            nodeKde = self.__LOO_Kde(data, i, num_h)
             if nodeKde == None: return None
             probs.update({(i):nodeKde})
         auxList = []
@@ -380,7 +402,7 @@ class newtonRapson(object):
         for elem in indices:
             if list(self.__insertedArcs(arcos,elem[1]).values()) == [[]]: 
                 if list(self.__insertedArcs(arcos,elem[0]).values()) == [[]]:
-                    arc_Kde = self.__LOO_Kde(data, elem)
+                    arc_Kde = self.__LOO_Kde(data, elem, num_h)
                     if arc_Kde == None: return None
                     for i in range(len(arc_Kde)):
                         denom = probs.get(elem[0])[i]
@@ -395,10 +417,10 @@ class newtonRapson(object):
                     arcosInseridos = []
                     somaDosArcosInseridos = []
                     for i in auxVar:
-                        arc_Kde = self.__LOO_Kde(data, i)
+                        arc_Kde = self.__LOO_Kde(data, i, num_h)
                         if arc_Kde == None: return None
                         i.append(elem[1])
-                        arc_Kde2 = self.__LOO_Kde(data, i)
+                        arc_Kde2 = self.__LOO_Kde(data, i, num_h)
                         if arc_Kde2 == None: return None
                         for i in range(len(arc_Kde)):
                             arc_Kde[i] = arc_Kde2[i]/arc_Kde[i]
@@ -410,7 +432,7 @@ class newtonRapson(object):
                             somaDosArcosInseridos[i] = somaDosArcosInseridos[i]+arcosInseridos[j][i]
             else:
                 if list(self.__insertedArcs(arcos,elem[0]).values()) == [[]]:
-                    arc_Kde = self.__LOO_Kde(data, elem)
+                    arc_Kde = self.__LOO_Kde(data, elem, num_h)
                     if arc_Kde == None: return None
                     for i in range(len(arc_Kde)):
                         arc_Kde[i] = arc_Kde[i]/probs.get(elem[0])[i]
@@ -420,14 +442,14 @@ class newtonRapson(object):
                     arcosJaInseridosEmNoAlvo = []
                     somaDosArcosInseridos = []
                     for i in auxVar:
-                        arc_Kde2 = self.__LOO_Kde(data, i)
+                        arc_Kde2 = self.__LOO_Kde(data, i, num_h)
                         if arc_Kde2 == None: return None
                         auxVar2 = [x for x in i if x != elem[1]]
                         arc_Kde3 = []
                         if len(auxVar2) == 1:
                             arc_Kde3 = probs.get(auxVar2[0])
                         else:
-                            arc_Kde3 = self.__LOO_Kde(data, auxVar2)
+                            arc_Kde3 = self.__LOO_Kde(data, auxVar2, num_h)
                             if arc_Kde3 == None: return None
                         for i in range(len(arc_Kde)):
                             arc_Kde2[i] = arc_Kde2[i]/arc_Kde3[i]
@@ -445,10 +467,10 @@ class newtonRapson(object):
                     arcosInseridos = []
                     somaDosArcosInseridos = []
                     for i in auxVar:
-                        arc_Kde = self.__LOO_Kde(data, i)
+                        arc_Kde = self.__LOO_Kde(data, i, num_h)
                         if arc_Kde == None: return None
                         i.append(elem[1])
-                        arc_Kde2 = self.__LOO_Kde(data, i)
+                        arc_Kde2 = self.__LOO_Kde(data, i, num_h)
                         if arc_Kde2 == None: return None
                         for i in range(len(arc_Kde)):
                             arc_Kde[i] = arc_Kde2[i]/arc_Kde[i]
@@ -457,14 +479,14 @@ class newtonRapson(object):
                     auxVar = self.__insertedArcs(arcos,elem[1])
                     auxVar = self.__probPaths(auxVar)
                     for i in auxVar:
-                        arc_Kde2 = self.__LOO_Kde(data, i)
+                        arc_Kde2 = self.__LOO_Kde(data, i, num_h)
                         if arc_Kde2 == None: return None
                         auxVar2 = [x for x in i if x != elem[1]]
                         arc_Kde3 = []
                         if len(auxVar2) == 1:
                             arc_Kde3 = probs.get(auxVar2[0])
                         else:
-                            arc_Kde3 = self.__LOO_Kde(data, auxVar2)
+                            arc_Kde3 = self.__LOO_Kde(data, auxVar2, num_h)
                             if arc_Kde3 == None: return None
                         for i in range(len(arc_Kde)):
                             arc_Kde2[i] = arc_Kde2[i]/arc_Kde3[i]
