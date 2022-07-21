@@ -3,7 +3,7 @@
 import math
 import copy
 import random
-import pickle as pkl
+import pickle
 
 class BayesianNetwork(object):
     '''
@@ -12,8 +12,8 @@ class BayesianNetwork(object):
     
     def __init__(self, data):
         self.data = data
-        self._graphProbabilities = {}
-        self._adjacencyMatrix = []
+        self.graphProbabilities = {}
+        self.adjacencyMatrix = []
 
     def __gaussian(self, x):
         """Computes the gaussian kernel of a given value.
@@ -562,6 +562,15 @@ class BayesianNetwork(object):
         """
         return self._graphProbabilities
 
+    @graphProbabilities.setter
+    def graphProbabilities(self, value):
+        """Sets a value to graphProbabilities.
+
+        Args:
+            value (dictionary): A dictionary to be assigned to graphProbabilities.
+        """
+        self._graphProbabilities = value
+
     @property
     def adjacencyMatrix(self):
         """Returns the adjacency Matrix of the graph.
@@ -571,13 +580,22 @@ class BayesianNetwork(object):
         """
         return self._adjacencyMatrix
 
+    @adjacencyMatrix.setter
+    def adjacencyMatrix(self, value):
+        """Sets a value to adjacencyMatrix.
+
+        Args:
+            value (list): A list to be assigned to adjacencyMatrix.
+        """
+        self._adjacencyMatrix = value
+
     def save(self, file_path):
         """Saves the network model into a file
 
         Args:
             file_path (string): The path of the file
         """
-        pkl.dump(self,open(file_path,'wb'),-1)
+        pickle.dump(self,open(file_path,'wb'),-1)
 
     def load(file_path):
         """Loads the network model from a file
@@ -588,4 +606,4 @@ class BayesianNetwork(object):
         Returns:
             BayesianNetwork: An object of the BayesianNetwork class
         """
-        return pkl.load(open(file_path, 'rb'))
+        return pickle.load(open(file_path, 'rb'))
