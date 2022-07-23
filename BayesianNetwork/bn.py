@@ -5,7 +5,7 @@ import copy
 import random
 import pickle
 
-class BayesianNetwork(object):
+class BayesianNetwork:
     '''
     This class implements the 1D and nD Newton-Raphson's bandwidth estimator method, its helping methods, and the 1D and nD Kernel Density Estimation method.
     '''
@@ -27,7 +27,7 @@ class BayesianNetwork(object):
         return ((1/math.sqrt(2*math.pi))*math.exp(-0.5*(x**2)))
     
     def __kernelDensityEstimation(self, x, data, h):
-        """Computes the Kernel Density Estimation (KDE) using the gaussian kernel and the Leave-One-Out technique of the given datapoints and bandwidth parameter.
+        """Using the gaussian kernel, it computes the Kernel Density Estimation (KDE) of the given datapoints and bandwidth parameter.
 
         Args:
             x (float): Point where the kde will be estimated.
@@ -35,7 +35,7 @@ class BayesianNetwork(object):
             h (float): Bandwidth parameter.
 
         Returns:
-            list: KDE of the input data and bandwidth.
+            float: KDE of the input data and bandwidth.
         """
     
         sum = 0
@@ -145,7 +145,7 @@ class BayesianNetwork(object):
         return ((2*math.pi)**(-self.__ndim(x)/2))*((idenMatrixDet)**(-0.5))*(math.exp(-0.5*self.__dot(self.__dot(x, idenMatrixInv), x)))
     
     def __multivariateKernelDensityEstimation(self, x, data, h):
-        """Computes the Multivariate Kernel Density Estimation (MKDE) using the multivariate gaussian kernel and the Leave-One-Out technique of the given datapoints and bandwidth parameter.
+        """Using the multivariate gaussian kernel, it computes the Multivariate Kernel Density Estimation (MKDE) of the given datapoints and bandwidth parameter.
 
         Args:
             x (list): N dimentional point where the mKDE will be estimated.
@@ -153,7 +153,7 @@ class BayesianNetwork(object):
             h (float): Bandwidth parameter.
 
         Returns:
-            list: KDE of the input data and bandwidth.
+            float: KDE of the input data and bandwidth.
         """
 
         sum = 0
@@ -187,7 +187,7 @@ class BayesianNetwork(object):
 
         Args:
             data (List): Datapoints to compute the KDE from.
-            index (tuple/int): The index of comlumns to use in the data partition method.
+            index (tuple, int): The index of comlumns to use in the data partition method.
             num_h (int): The amount of h to be used to compute the best KDE. 
 
         Returns:
@@ -369,7 +369,7 @@ class BayesianNetwork(object):
 
         Args:
             data (list): Datapoints to compute the MLE from.
-            num_h (int): The amount of h to be used to compute the best KDE. 
+            num_h (int, optional): The amount of h to be used to compute the best KDE. Defaults to 100.
 
         Raises:
             TypeError: data must be list.
@@ -552,6 +552,23 @@ class BayesianNetwork(object):
                             arcos.append(indicePar1)
         self.graphProbabilities = probs
         self.adjacencyMatrix = adjacency_matrix
+
+    def predict(self, point, num_h=100):
+        """Compute the probability that the point belongs to a class.
+
+        Args:
+            point (list): N dimentional point where the mKDE will be estimated.
+            num_h (int, optional): The amount of h to be used to compute the best KDE. Defaults to 100.
+
+        Returns:
+            float: The probability of belonging.
+        """
+        rightEndpoint = self.__intervalH(self.data)
+        hs = {round(random.uniform(0.1, rightEndpoint),1) for x in range(num_h)}
+        kde = []
+        for h in hs:
+            kde.append(self.__multivariateKernelDensityEstimation(point, self.data, h))
+        return round(max(kde),3)
 
     @property
     def graphProbabilities(self):
