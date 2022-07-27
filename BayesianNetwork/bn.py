@@ -15,8 +15,44 @@ class BayesianNetwork:
         self.graphProbabilities = {}
         self.adjacencyMatrix = []
 
+    @property
+    def graphProbabilities(self):
+        """Returns all the probabilities of the graph.
+
+        Returns:
+            dictionary: The probabilities of the graph.
+        """
+        return self._graphProbabilities
+
+    @graphProbabilities.setter
+    def graphProbabilities(self, value):
+        """Sets a value to graphProbabilities.
+
+        Args:
+            value (dictionary): A dictionary to be assigned to graphProbabilities.
+        """
+        self._graphProbabilities = value
+
+    @property
+    def adjacencyMatrix(self):
+        """Returns the adjacency Matrix of the graph.
+
+        Returns:
+            list: the adjacency Matrix of the graph
+        """
+        return self._adjacencyMatrix
+
+    @adjacencyMatrix.setter
+    def adjacencyMatrix(self, value):
+        """Sets a value to adjacencyMatrix.
+
+        Args:
+            value (list): A list to be assigned to adjacencyMatrix.
+        """
+        self._adjacencyMatrix = value
+        
     def __gaussian(self, x):
-        """Computes the gaussian kernel of a given value.
+        """Compute the gaussian kernel of a given value.
 
         Args:
             x (float): Value to be computed.
@@ -131,7 +167,7 @@ class BayesianNetwork:
         return result
 
     def __multivariateGaussian(self, x):
-        """Computes the multivariate gaussian kernel of a given value. 
+        """Compute the multivariate gaussian kernel of a given value. 
 
         Args:
             x (list): Value to be computed.
@@ -162,7 +198,7 @@ class BayesianNetwork:
         return (sum/(len(data)*h**self.__ndim(x)))
 
     def __intervalH(self, data):
-        """Computes the right endpoint of the interval of values h can assume. The other endpoint is 0.1.
+        """Compute the right endpoint of the interval of values h can assume. The other endpoint is 0.1.
 
         Args:
             data (List): Datapoints to compute the interval from.
@@ -365,7 +401,7 @@ class BayesianNetwork:
         return myList3
 
     def fit(self, num_h=100):
-        """Computes the Maximum-Likelihood Estimation (MLE) of data and returns the adjacency matrix.
+        """Compute the Maximum-Likelihood Estimation (MLE) of data and returns the adjacency matrix.
 
         Args:
             data (list): Datapoints to compute the MLE from.
@@ -553,7 +589,7 @@ class BayesianNetwork:
         self.graphProbabilities = probs
         self.adjacencyMatrix = adjacency_matrix
 
-    def predict(self, point, num_h=100):
+    def __predictPoint(self, point, num_h=100):
         """Compute the probability that the point belongs to a class.
 
         Args:
@@ -570,41 +606,56 @@ class BayesianNetwork:
             kde.append(self.__multivariateKernelDensityEstimation(point, self.data, h))
         return round(max(kde),3)
 
-    @property
-    def graphProbabilities(self):
-        """Returns all the probabilities of the graph.
-
-        Returns:
-            dictionary: The probabilities of the graph.
-        """
-        return self._graphProbabilities
-
-    @graphProbabilities.setter
-    def graphProbabilities(self, value):
-        """Sets a value to graphProbabilities.
+    @staticmethod
+    def predict(x_test, *args):
+        """Predict the class for the provided data.
 
         Args:
-            value (dictionary): A dictionary to be assigned to graphProbabilities.
-        """
-        self._graphProbabilities = value
-
-    @property
-    def adjacencyMatrix(self):
-        """Returns the adjacency Matrix of the graph.
+            x_test (list): Test samples.
+            args (BayesianNetwork): The classes.
 
         Returns:
-            list: the adjacency Matrix of the graph
+            list: Class labels for each data sample
         """
-        return self._adjacencyMatrix
+        y_pred = []
+        for i in x_test:
+            aux = []
+            for j in args:
+                aux.append(j.__predictPoint(i))
+            y_pred.append(aux.index(max(aux)))
+        return y_pred
 
-    @adjacencyMatrix.setter
-    def adjacencyMatrix(self, value):
-        """Sets a value to adjacencyMatrix.
+    @staticmethod
+    def accuracy(y_test, y_pred):
+        """Accuracy classification score.
 
         Args:
-            value (list): A list to be assigned to adjacencyMatrix.
+            y_test (list): correct labels.
+            y_pred (list): Predicted labels.
+
+        Returns:
+            float: The percentage of correctly classified samples.
         """
-        self._adjacencyMatrix = value
+        totalElements = len(y_test)
+        correctPredictions = sum([1 for i in range(totalElements) if y_test[i] == y_pred[i]])
+        return round(correctPredictions/totalElements,2)
+
+    @staticmethod
+    def confusionMatrix(y_test, y_pred):
+        """Calculate the confusion matrix to evaluate classification accuracy.
+
+        Args:
+            y_test (list): correct labels.
+            y_pred (list): Predicted labels.
+
+        Returns:
+            list: The confusion matrix.
+        """
+        n_classes = (len(set(y_test)))
+        m = [[0] * n_classes for i in range(n_classes)]
+        for pred, exp in zip(y_pred, y_test):
+            m[pred][exp] += 1
+        return m
 
     def save(self, file_path):
         """Saves the network model into a file
