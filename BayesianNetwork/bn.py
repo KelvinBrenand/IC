@@ -88,7 +88,7 @@ class BayesianNetwork:
         Returns:
             list: Identity matrix.
         """
-        m=[[0. for x in range(n)] for y in range(n)]
+        m=[[0. for _ in range(n)] for _ in range(n)]
         for i in range(0,n):
             m[i][i] = 1.
         return m
@@ -148,7 +148,7 @@ class BayesianNetwork:
         """
         if isinstance(A, list) and isinstance(B, list) and len(A) == len(B):
             if isinstance(A[0], list) and isinstance(B[0], list) and len(A[0]) == len(B[0]):
-                result = [[0 for i in range(len(A[0]))] for n in range(len(A[0]))]
+                result = [[0 for _ in range(len(A[0]))] for _ in range(len(A[0]))]
                 for i in range(len(A)):
                     for j in range(len(B[0])):
                         for k in range(len(B)):
@@ -231,7 +231,7 @@ class BayesianNetwork:
         """
         myData = self.__dataPartition(data, index)
         rightEndpoint = self.__intervalH(myData)
-        hs = {round(random.uniform(0.1, rightEndpoint),1) for x in range(num_h)}
+        hs = {round(random.uniform(0.1, rightEndpoint),1) for _ in range(num_h)}
         logsAndKdes = {}
         for h in hs:
             kde = []
@@ -415,12 +415,12 @@ class BayesianNetwork:
             None: If a RuntimeError happend.
         """
 
-        if not type(self.data) is list:
-            raise TypeError("data must be list")
+        if not (isinstance(self.data, list) and isinstance(self.data[0], list)):
+            raise TypeError("data must be list of lists")
 
         auxVar = 1.0
         probs = {}
-        adjacency_matrix = [[0 for i in range(len(self.data[0]))] for n in range(len(self.data[0]))]
+        adjacency_matrix = [[0 for _ in range(len(self.data[0]))] for _ in range(len(self.data[0]))]
         for i in range (len(self.data[0])):
             nodeKde = self.__LOO_Kde(self.data, i, num_h)
             if nodeKde == None: return None
@@ -600,18 +600,19 @@ class BayesianNetwork:
             float: The probability of belonging.
         """
         rightEndpoint = self.__intervalH(self.data)
-        hs = {round(random.uniform(0.1, rightEndpoint),1) for x in range(num_h)}
+        hs = {round(random.uniform(0.1, rightEndpoint),1) for _ in range(num_h)}
         kde = []
         for h in hs:
             kde.append(self.__multivariateKernelDensityEstimation(point, self.data, h))
         return round(max(kde),3)
 
     @staticmethod
-    def predict(x_test, *args):
+    def predict(x_test, classLabels, *args):
         """Predict the class for the provided data.
 
         Args:
             x_test (list): Test samples.
+            classLabels (list): The class labels;
             args (BayesianNetwork): The classes.
 
         Returns:
@@ -622,7 +623,7 @@ class BayesianNetwork:
             aux = []
             for j in args:
                 aux.append(j.__predictPoint(i))
-            y_pred.append(aux.index(max(aux)))
+            y_pred.append(classLabels[aux.index(max(aux))])
         return y_pred
 
     @staticmethod
@@ -630,7 +631,7 @@ class BayesianNetwork:
         """Accuracy classification score.
 
         Args:
-            y_test (list): correct labels.
+            y_test (list): Correct labels.
             y_pred (list): Predicted labels.
 
         Returns:
@@ -641,21 +642,22 @@ class BayesianNetwork:
         return round(correctPredictions/totalElements,2)
 
     @staticmethod
-    def confusionMatrix(y_test, y_pred):
+    def confusionMatrix(actual, predicted):
         """Calculate the confusion matrix to evaluate classification accuracy.
 
         Args:
-            y_test (list): correct labels.
-            y_pred (list): Predicted labels.
+            actual (list): Correct labels.
+            predicted (list): Predicted labels.
 
         Returns:
             list: The confusion matrix.
         """
-        n_classes = (len(set(y_test)))
-        m = [[0] * n_classes for i in range(n_classes)]
-        for pred, exp in zip(y_pred, y_test):
-            m[pred][exp] += 1
-        return m
+        unique = sorted(set(actual))
+        matrix = [[0 for _ in unique] for _ in unique]
+        imap   = {key: i for i, key in enumerate(unique)}
+        for p, a in zip(predicted, actual):
+            matrix[imap[a]][imap[p]] += 1
+        return matrix
 
     def save(self, file_path):
         """Saves the network model into a file
