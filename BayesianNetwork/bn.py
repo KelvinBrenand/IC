@@ -627,18 +627,18 @@ class BayesianNetwork:
         return y_pred
 
     @staticmethod
-    def accuracy(y_test, y_pred):
+    def accuracy(actual, predicted):
         """Accuracy classification score.
 
         Args:
-            y_test (list): Correct labels.
-            y_pred (list): Predicted labels.
+            actual (list): Correct labels.
+            predicted (list): Predicted labels.
 
         Returns:
             float: The percentage of correctly classified samples.
         """
-        totalElements = len(y_test)
-        correctPredictions = sum([1 for i in range(totalElements) if y_test[i] == y_pred[i]])
+        totalElements = len(actual)
+        correctPredictions = sum([1 for i in range(totalElements) if actual[i] == predicted[i]])
         return round(correctPredictions/totalElements,2)
 
     @staticmethod
@@ -655,7 +655,7 @@ class BayesianNetwork:
         unique = sorted(set(actual))
         matrix = [[0 for _ in unique] for _ in unique]
         imap   = {key: i for i, key in enumerate(unique)}
-        for p, a in zip(predicted, actual):
+        for a, p in zip(actual, predicted):
             matrix[imap[a]][imap[p]] += 1
         return matrix
 
