@@ -7,7 +7,8 @@ import pickle
 
 class BayesianNetwork:
     '''
-    This class implements the 1D and nD Newton-Raphson's bandwidth estimator method, its helping methods, and the 1D and nD Kernel Density Estimation method.
+    This class implements the 1D and nD Newton-Raphson's bandwidth estimator method, its helping methods, and the 1D 
+    and nD Kernel Density Estimation method.
     '''
     
     def __init__(self, data):
@@ -63,11 +64,11 @@ class BayesianNetwork:
         return ((1/math.sqrt(2*math.pi))*math.exp(-0.5*(x**2)))
     
     def __kernelDensityEstimation(self, x, data, h):
-        """Using the gaussian kernel, it computes the Kernel Density Estimation (KDE) of the given datapoints and bandwidth parameter.
+        """Using the gaussian kernel, it computes the Kernel Density Estimation (KDE) of the given data points and bandwidth parameter.
 
         Args:
             x (float): Point where the kde will be estimated.
-            data (list): Datapoints to compute the KDE from.
+            data (list): Data points to compute the KDE from.
             h (float): Bandwidth parameter.
 
         Returns:
@@ -144,7 +145,8 @@ class BayesianNetwork:
             B (list): Second list.
 
         Returns:
-            list or float: If A and B are both 1D, it returns the resulting float of the inner product. If B is 2D, it returns the resulting list of the sum product.
+            list or float: If A and B are both 1D, it returns the resulting float of the inner product. If B is 2D, 
+            it returns the resulting list of the sum product.
         """
         if isinstance(A, list) and isinstance(B, list) and len(A) == len(B):
             if isinstance(A[0], list) and isinstance(B[0], list) and len(A[0]) == len(B[0]):
@@ -181,11 +183,12 @@ class BayesianNetwork:
         return ((2*math.pi)**(-self.__ndim(x)/2))*((idenMatrixDet)**(-0.5))*(math.exp(-0.5*self.__dot(self.__dot(x, idenMatrixInv), x)))
     
     def __multivariateKernelDensityEstimation(self, x, data, h):
-        """Using the multivariate gaussian kernel, it computes the Multivariate Kernel Density Estimation (MKDE) of the given datapoints and bandwidth parameter.
+        """Using the multivariate gaussian kernel, it computes the Multivariate Kernel Density Estimation (MKDE) of 
+        the given data points and bandwidth parameter.
 
         Args:
-            x (list): N dimentional point where the mKDE will be estimated.
-            data (list): Datapoints to compute the KDE from.
+            x (list): N dimensional point where the mKDE will be estimated.
+            data (list): Data points to compute the KDE from.
             h (float): Bandwidth parameter.
 
         Returns:
@@ -201,7 +204,7 @@ class BayesianNetwork:
         """Compute the right endpoint of the interval of values h can assume. The other endpoint is 0.1.
 
         Args:
-            data (List): Datapoints to compute the interval from.
+            data (List): Data points to compute the interval from.
 
         Returns:
             float: The right endpoint.
@@ -222,8 +225,8 @@ class BayesianNetwork:
         """Performs the bandwidth estimation and the Leave-One-Out KDE for either the 1D KDE or the Multivariate KDE.
 
         Args:
-            data (List): Datapoints to compute the KDE from.
-            index (tuple, int): The index of comlumns to use in the data partition method.
+            data (List): Data points to compute the KDE from.
+            index (tuple, int): The index of columns to use in the data partition method.
             num_h (int): The amount of h to be used to compute the best KDE. 
 
         Returns:
@@ -275,7 +278,7 @@ class BayesianNetwork:
             index (tuple/int): The n specific columns.
 
         Returns:
-            list: The specific columns of the N dimentional data.
+            list: The specific columns of the N dimensional data.
         """
         if isinstance(index, int):
             return [row[index] for row in data]
@@ -404,7 +407,7 @@ class BayesianNetwork:
         """Compute the Maximum-Likelihood Estimation (MLE) of data and returns the adjacency matrix.
 
         Args:
-            data (list): Datapoints to compute the MLE from.
+            data (list): Data points to compute the MLE from.
             num_h (int, optional): The amount of h to be used to compute the best KDE. Defaults to 100.
 
         Raises:
@@ -412,7 +415,7 @@ class BayesianNetwork:
 
         Returns:
             list: The adjacency matrix associated with data.
-            None: If a RuntimeError happend.
+            None: If a RuntimeError happened.
         """
 
         if not (isinstance(self.data, list) and isinstance(self.data[0], list)):
@@ -593,7 +596,7 @@ class BayesianNetwork:
         """Compute the probability that the point belongs to a class.
 
         Args:
-            point (list): N dimentional point where the mKDE will be estimated.
+            point (list): N dimensional point where the mKDE will be estimated.
             num_h (int, optional): The amount of h to be used to compute the best KDE. Defaults to 100.
 
         Returns:
@@ -607,13 +610,13 @@ class BayesianNetwork:
         return round(max(kde),3)
 
     @staticmethod
-    def predict(x_test, classLabels, *args):
+    def predict(x_test, classLabels, networks):
         """Predict the class for the provided data.
 
         Args:
             x_test (list): Test samples.
-            classLabels (list): The class labels;
-            args (BayesianNetwork): The classes.
+            classLabels (list): The classes labels.
+            networks (list of BayesianNetwork): The classes.
 
         Returns:
             list: Class labels for each data sample
@@ -621,10 +624,55 @@ class BayesianNetwork:
         y_pred = []
         for i in x_test:
             aux = []
-            for j in args:
+            for j in networks:
                 aux.append(j.__predictPoint(i))
             y_pred.append(classLabels[aux.index(max(aux))])
         return y_pred
+
+    @staticmethod
+    def kfoldcv(data, labels, k = 2):
+        """Perform the Kfold Cross Validation to obtain the best group of networks based on its accuracy value.
+
+        Args:
+            data (list): The data points.
+            labels (list): The classes labels.
+            k (int, optional): Number of folds. Defaults to 2.
+
+        Raises:
+            ValueError: Number of folds k must be greater than 1 and smaller than the data size.
+
+        Returns:
+            list of BayesianNetwork, float: The best group of networks and its corresponding accuracy.
+        """
+
+        size = len(data)
+        if k <=1 or k > size: raise ValueError('Invalid k value')
+        subset_size = round(size / k)
+        temp = list(zip(data, labels))
+        random.shuffle(temp)
+        data, labels = list(zip(*temp))
+        count = 0
+        netsAndAcc = []
+        for x in range(0, size, subset_size):
+            count += 1
+            if count > k: break
+            X_train = data[:x]+data[x+subset_size:]
+            y_train = labels[:x]+labels[x+subset_size:]
+            X_test = data[x:x+subset_size]
+            y_test = labels[x:x+subset_size]
+            
+            classes = list(set(y_train))
+            networks = []
+            for j in classes:
+                networks.append(BayesianNetwork([X_train[i] for i in range(len(y_train)) if y_train[i] == j]))
+            y_pred = BayesianNetwork.predict(X_test, classes, networks)
+            netsAndAcc.append((networks,BayesianNetwork.accuracy(y_test, y_pred)))
+        indexAndValueOfTheBestAcc = [0,0]
+        for i in range(len(netsAndAcc)):
+            if netsAndAcc[i][1] > indexAndValueOfTheBestAcc[1]:
+                indexAndValueOfTheBestAcc[0] = i
+                indexAndValueOfTheBestAcc[1] = netsAndAcc[i][1]
+        return netsAndAcc[indexAndValueOfTheBestAcc[0]]
 
     @staticmethod
     def accuracy(actual, predicted):
