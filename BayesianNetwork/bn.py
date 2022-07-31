@@ -630,19 +630,21 @@ class BayesianNetwork:
         return y_pred
 
     @staticmethod
-    def kfoldcv(data, labels, k = 2):
+    def kfoldcv(data, labels, k = 2, accuracy = False, confMtx = False):
         """Perform the Kfold Cross Validation to obtain the best group of networks based on its accuracy value.
 
         Args:
             data (list): The data points.
             labels (list): The classes labels.
             k (int, optional): Number of folds. Defaults to 2.
+            accuracy (bool, optional): Return the accuracy if true. Defaults to False.
+            confMtx (bool, optional): Return the confusion matrix if true. Defaults to False.
 
         Raises:
             ValueError: Number of folds k must be greater than 1 and smaller than the data size.
 
         Returns:
-            list of BayesianNetwork, float: The best group of networks and its corresponding accuracy.
+            list of BayesianNetwork: The best group of networks.
         """
 
         size = len(data)
@@ -652,7 +654,7 @@ class BayesianNetwork:
         random.shuffle(temp)
         data, labels = list(zip(*temp))
         count = 0
-        netsAndAcc = []
+        netsAndYpredtestAndAcc = []
         for x in range(0, size, subset_size):
             count += 1
             if count > k: break
@@ -666,13 +668,22 @@ class BayesianNetwork:
             for j in classes:
                 networks.append(BayesianNetwork([X_train[i] for i in range(len(y_train)) if y_train[i] == j]))
             y_pred = BayesianNetwork.predict(X_test, classes, networks)
-            netsAndAcc.append((networks,BayesianNetwork.accuracy(y_test, y_pred)))
-        indexAndValueOfTheBestAcc = [0,0]
-        for i in range(len(netsAndAcc)):
-            if netsAndAcc[i][1] > indexAndValueOfTheBestAcc[1]:
-                indexAndValueOfTheBestAcc[0] = i
-                indexAndValueOfTheBestAcc[1] = netsAndAcc[i][1]
-        return netsAndAcc[indexAndValueOfTheBestAcc[0]]
+            netsAndYpredtestAndAcc.append((networks,y_test, y_pred,BayesianNetwork.accuracy(y_test, y_pred)))
+        idxAndValueBestAcc = [0,0]
+        for i in range(len(netsAndYpredtestAndAcc)):
+            if netsAndYpredtestAndAcc[i][-1] > idxAndValueBestAcc[-1]:
+                idxAndValueBestAcc[0] = i
+                idxAndValueBestAcc[-1] = netsAndYpredtestAndAcc[i][-1]
+        for i in netsAndYpredtestAndAcc[idxAndValueBestAcc[0]]:
+            i.fit()
+
+        if accuracy and confMtx:
+            return netsAndYpredtestAndAcc[idxAndValueBestAcc[0]], netsAndYpredtestAndAcc[idxAndValueBestAcc[-1]], BayesianNetwork.confusionMatrix(netsAndYpredtestAndAcc[idxAndValueBestAcc[1]],netsAndYpredtestAndAcc[idxAndValueBestAcc[2]])
+        if accuracy and not confMtx:
+            return netsAndYpredtestAndAcc[idxAndValueBestAcc[0]], netsAndYpredtestAndAcc[idxAndValueBestAcc[-1]]
+        if confMtx and not accuracy:
+            return netsAndYpredtestAndAcc[idxAndValueBestAcc[0]], BayesianNetwork.confusionMatrix(netsAndYpredtestAndAcc[idxAndValueBestAcc[1]],netsAndYpredtestAndAcc[idxAndValueBestAcc[2]])
+        return netsAndYpredtestAndAcc[idxAndValueBestAcc[0]]
 
     @staticmethod
     def accuracy(actual, predicted):
