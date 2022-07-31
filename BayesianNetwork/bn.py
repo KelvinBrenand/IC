@@ -652,7 +652,9 @@ class BayesianNetwork:
         subset_size = round(size / k)
         temp = list(zip(data, labels))
         random.shuffle(temp)
-        data, labels = list(zip(*temp))
+        data, labels = zip(*temp)
+        data = list(data)
+        labels = list(labels)
         count = 0
         netsAndYpredtestAndAcc = []
         for x in range(0, size, subset_size):
@@ -668,22 +670,22 @@ class BayesianNetwork:
             for j in classes:
                 networks.append(BayesianNetwork([X_train[i] for i in range(len(y_train)) if y_train[i] == j]))
             y_pred = BayesianNetwork.predict(X_test, classes, networks)
-            netsAndYpredtestAndAcc.append((networks,y_test, y_pred,BayesianNetwork.accuracy(y_test, y_pred)))
+            netsAndYpredtestAndAcc.append((networks, y_test, y_pred, BayesianNetwork.accuracy(y_test, y_pred)))
         idxAndValueBestAcc = [0,0]
         for i in range(len(netsAndYpredtestAndAcc)):
             if netsAndYpredtestAndAcc[i][-1] > idxAndValueBestAcc[-1]:
                 idxAndValueBestAcc[0] = i
                 idxAndValueBestAcc[-1] = netsAndYpredtestAndAcc[i][-1]
-        for i in netsAndYpredtestAndAcc[idxAndValueBestAcc[0]]:
+        for i in netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][0]:
             i.fit()
 
         if accuracy and confMtx:
-            return netsAndYpredtestAndAcc[idxAndValueBestAcc[0]], netsAndYpredtestAndAcc[idxAndValueBestAcc[-1]], BayesianNetwork.confusionMatrix(netsAndYpredtestAndAcc[idxAndValueBestAcc[1]],netsAndYpredtestAndAcc[idxAndValueBestAcc[2]])
+            return netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][0], netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][-1], BayesianNetwork.confusionMatrix(netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][1],netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][2])
         if accuracy and not confMtx:
-            return netsAndYpredtestAndAcc[idxAndValueBestAcc[0]], netsAndYpredtestAndAcc[idxAndValueBestAcc[-1]]
+            return netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][0], netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][-1]
         if confMtx and not accuracy:
-            return netsAndYpredtestAndAcc[idxAndValueBestAcc[0]], BayesianNetwork.confusionMatrix(netsAndYpredtestAndAcc[idxAndValueBestAcc[1]],netsAndYpredtestAndAcc[idxAndValueBestAcc[2]])
-        return netsAndYpredtestAndAcc[idxAndValueBestAcc[0]]
+            return netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][0], BayesianNetwork.confusionMatrix(netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][1],netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][2])
+        return netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][0]
 
     @staticmethod
     def accuracy(actual, predicted):
