@@ -91,10 +91,10 @@ class BayesianNetwork:
         Returns:
             list: Identity matrix.
         """
-        m=[[0. for _ in range(n)] for _ in range(n)]
+        matrix = [[0. for _ in range(n)] for _ in range(n)]
         for i in range(0,n):
-            m[i][i] = 1.
-        return m
+            matrix[i][i] = 1.
+        return matrix
 
     def __ndim(self, x):
         """Number of array dimensions.
@@ -119,10 +119,10 @@ class BayesianNetwork:
         Returns:
             list: The difference between the two lists.
         """
-        result = []
+        subtractionResult = []
         for i in range(len(x)):
-            result.append(x[i] - y[i])
-        return result
+            subtractionResult.append(x[i] - y[i])
+        return subtractionResult
 
     def __listDivision(self, x, y):
         """Performs the division operation between the elements of two given lists.
@@ -134,41 +134,39 @@ class BayesianNetwork:
         Returns:
             list: The result of the division.
         """
-        result = []
+        divisionResult = []
         for i in range(len(x)):
-            result.append(x[i]/y)
-        return result
+            divisionResult.append(x[i]/y)
+        return divisionResult
 
-    def __dot(self, A,B):
+    def __dot(self, x,y):
         """Dot product of two values.
 
         Args:
-            A (list): First list.
-            B (list): Second list.
+            x (list): First list.
+            y (list): Second list.
 
         Returns:
-            list or float: If A and B are both 1D, it returns the resulting float of the inner product. If B is 2D, 
-            it returns the resulting list of the sum product.
+            list or float: If x and y are both NxN, it returns the square matrix multiplication.
+                           If x is 1D and y is 2D, it returns the resulting list of the sum product.
+                           If x and y are both 1D, it returns the resulting float of the inner product. 
         """
-        if isinstance(A, list) and isinstance(B, list) and len(A) == len(B):
-            if isinstance(A[0], list) and isinstance(B[0], list) and len(A[0]) == len(B[0]):
-                result = [[0 for _ in range(len(A[0]))] for _ in range(len(A[0]))]
-                for i in range(len(A)):
-                    for j in range(len(B[0])):
-                        for k in range(len(B)):
-                            result[i][j] += A[i][k] * B[k][j]
-                return result
-        try:
-            auxVar = len(B[0])
-            result = [0.] * len(A)
-            for i in range(len(A)):
-                for j in range(len(B)):
-                    result[i] += A[j] * B[j][i]
-        except:
-            result = 0.
-            for i in range(len(A)):
-                result += A[i]*B[i]
-        return result
+        if isinstance(x[0], list) and isinstance(y[0], list) and len(x[0]) == len(y[0]):
+            dotResult = [[0 for _ in range(len(x[0]))] for _ in range(len(x[0]))]
+            for i in range(len(x)):
+                for j in range(len(y[0])):
+                    for k in range(len(y)):
+                        dotResult[i][j] += x[i][k] * y[k][j]
+        elif not isinstance(x[0], list) and isinstance(y[0],list):
+            dotResult = [0.] * len(x)
+            for i in range(len(x)):
+                for j in range(len(y)):
+                    dotResult[i] += x[j] * y[j][i]
+        else:
+            dotResult = 0.
+            for i in range(len(x)):
+                dotResult += x[i]*y[i]
+        return dotResult
 
     def __multivariateGaussian(self, x):
         """Compute the multivariate gaussian kernel of a given value. 
