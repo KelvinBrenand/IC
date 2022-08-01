@@ -1,9 +1,11 @@
+#Universidade Federal da Paraíba - Centro de Informática
 # Author: Kelvin Brenand <brenand.kelvin@gmail.com>
 
 import math
 import copy
 import random
 import pickle
+import json
 
 class BayesianNetwork:
     '''
@@ -721,7 +723,7 @@ class BayesianNetwork:
         return matrix
 
     def save(self, file_path):
-        """Saves the network model into a file
+        """Saves the network model into a pickle file
 
         Args:
             file_path (string): The path of the file
@@ -729,7 +731,7 @@ class BayesianNetwork:
         pickle.dump(self,open(file_path,'wb'),-1)
 
     def load(file_path):
-        """Loads the network model from a file
+        """Loads the network model from a pickle file
 
         Args:
             file_path (string): The path of the file
@@ -738,3 +740,12 @@ class BayesianNetwork:
             BayesianNetwork: An object of the BayesianNetwork class
         """
         return pickle.load(open(file_path, 'rb'))
+
+    def saveJson(self, file_path):
+        """Saves the network model into a json file
+
+        Args:
+            file_path (string): The path of the file
+        """
+        with open(file_path, 'w') as outfile:
+            json.dump(self.__dict__, outfile, indent=4)

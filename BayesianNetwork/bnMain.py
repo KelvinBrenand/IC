@@ -9,6 +9,3 @@ y = df.iloc[:, 5].values.tolist()
 networks, acc, confMtx = BayesianNetwork.kfoldcv(X, y, 2, accuracy=True, confMtx=True)
 print("Accuracy:",acc)
 print(np.array(confMtx))
-
-for i in range(len(networks)):
-    networks[i].save("model"+str(i)+".pkl")
