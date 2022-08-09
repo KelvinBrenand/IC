@@ -7,7 +7,7 @@ import random
 import pickle
 import json
 
-MIN_DIVISOR = 0.001
+MIN_VALUE = 0.001
 
 class BayesianNetwork:
     '''
@@ -78,7 +78,7 @@ class BayesianNetwork:
         Returns:
             float: KDE of the input data and bandwidth.
         """
-        if h <= 0: h = MIN_DIVISOR
+        if h <= 0: h = MIN_VALUE
         sum = 0
         for i in range(len(data)):
             sum += self.__gaussian((x - data[i])/h)
@@ -137,7 +137,7 @@ class BayesianNetwork:
         """
         divisionResult = []
         for i in range(len(x)):
-            if y == 0: divisionResult.append(x[i]/MIN_DIVISOR)
+            if y == 0: divisionResult.append(x[i]/MIN_VALUE)
             else: divisionResult.append(x[i]/y)
         return divisionResult
 
@@ -200,7 +200,7 @@ class BayesianNetwork:
         sum = 0
         for i in range(len(data)):
             sum += self.__multivariateGaussian(self.__listDivision(self.__listSubtraction(x, data[i]), h))
-        if (len(data)*h**self.__ndim(x)) == 0: return (sum/MIN_DIVISOR)
+        if (len(data)*h**self.__ndim(x)) == 0: return (sum/MIN_VALUE)
         else: return (sum/(len(data)*h**self.__ndim(x)))
 
     def __intervalH(self, data):
@@ -219,7 +219,7 @@ class BayesianNetwork:
                 if i == j: continue
                 if isinstance(i, (float, int)): pointDist.append(math.dist([i],[j]))
                 else: pointDist.append(math.dist(i,j))
-            if pointDist == []: minPointsDist.append(MIN_DIVISOR)
+            if pointDist == []: minPointsDist.append(MIN_VALUE)
             else: minPointsDist.append(min(pointDist))
         return max(minPointsDist)
 
@@ -250,7 +250,7 @@ class BayesianNetwork:
                 dataSegmentCopy = dataSegment.copy()
             log = []
             for i in range(len(kde)):
-                if kde[i] <= 0: log.append(math.log(MIN_DIVISOR))
+                if kde[i] <= 0: log.append(math.log(MIN_VALUE))
                 else: log.append(math.log(kde[i]))
             logsAndKdes.update({sum(log):kde})
         return logsAndKdes.get(max(logsAndKdes))
@@ -429,7 +429,7 @@ class BayesianNetwork:
         for i in range(len(probs.get((0)))):
             for j in range(len(probs)):
                 probsMultiplication = probsMultiplication*probs.get((j))[i]
-                if probsMultiplication == 0: probsMultiplication = MIN_DIVISOR
+                if probsMultiplication == 0: probsMultiplication = MIN_VALUE
             auxList.append(math.log(probsMultiplication))
             probsMultiplication = 1.0
         last_MLE = sum(auxList)
@@ -443,10 +443,8 @@ class BayesianNetwork:
                     arc_Kde = self.__LOO_Kde(self.data, elem, num_h)
                     if arc_Kde == None: return None
                     for i in range(len(arc_Kde)):
-                        denominator = probs.get(elem[0])[i]
-                        if denominator == 0:
-                            denominator = MIN_DIVISOR
-                        arc_Kde[i] = arc_Kde[i]/denominator
+                        if probs.get(elem[0])[i] == 0: arc_Kde[i] = arc_Kde[i]/MIN_VALUE
+                        else: arc_Kde[i]/probs.get(elem[0])[i]
                     sumInsertedArcs = arc_Kde.copy()
                 
                 else:
@@ -460,7 +458,7 @@ class BayesianNetwork:
                         arc_Kde2 = self.__LOO_Kde(self.data, i, num_h)
                         if arc_Kde2 == None: return None
                         for i in range(len(arc_Kde)):
-                            if arc_Kde[i] == 0: arc_Kde[i] = arc_Kde2[i]/MIN_DIVISOR
+                            if arc_Kde[i] == 0: arc_Kde[i] = arc_Kde2[i]/MIN_VALUE
                             else: arc_Kde[i] = arc_Kde2[i]/arc_Kde[i]
                         insertedArcs.append(arc_Kde)
 
@@ -473,7 +471,7 @@ class BayesianNetwork:
                     arc_Kde = self.__LOO_Kde(self.data, elem, num_h)
                     if arc_Kde == None: return None
                     for i in range(len(arc_Kde)):
-                        if probs.get(elem[0])[i] == 0: arc_Kde[i] = arc_Kde[i]/MIN_DIVISOR
+                        if probs.get(elem[0])[i] == 0: arc_Kde[i] = arc_Kde[i]/MIN_VALUE
                         else: arc_Kde[i] = arc_Kde[i]/probs.get(elem[0])[i]
 
                     nodeProbPaths = self.__probPaths(self.__insertedArcs(arcs,elem[1]))
@@ -489,7 +487,7 @@ class BayesianNetwork:
                             arc_Kde3 = self.__LOO_Kde(self.data, index, num_h)
                             if arc_Kde3 == None: return None
                         for i in range(len(arc_Kde)):
-                            if arc_Kde3[i] == 0: arc_Kde2[i] = arc_Kde2[i]/MIN_DIVISOR
+                            if arc_Kde3[i] == 0: arc_Kde2[i] = arc_Kde2[i]/MIN_VALUE
                             else: arc_Kde2[i] = arc_Kde2[i]/arc_Kde3[i]
                         arcsAlreadyInTargetNode.append(arc_Kde2)
                     
@@ -509,7 +507,7 @@ class BayesianNetwork:
                         arc_Kde2 = self.__LOO_Kde(self.data, i, num_h)
                         if arc_Kde2 == None: return None
                         for i in range(len(arc_Kde)):
-                            if arc_Kde[i] == 0: arc_Kde[i] = arc_Kde2[i]/MIN_DIVISOR
+                            if arc_Kde[i] == 0: arc_Kde[i] = arc_Kde2[i]/MIN_VALUE
                             else: arc_Kde[i] = arc_Kde2[i]/arc_Kde[i]
                         insertedArcs.append(arc_Kde)
 
@@ -525,7 +523,7 @@ class BayesianNetwork:
                             arc_Kde3 = self.__LOO_Kde(self.data, index, num_h)
                             if arc_Kde3 == None: return None
                         for i in range(len(arc_Kde)):
-                            if arc_Kde3[i] == 0: arc_Kde2[i] = arc_Kde2[i]/MIN_DIVISOR
+                            if arc_Kde3[i] == 0: arc_Kde2[i] = arc_Kde2[i]/MIN_VALUE
                             else: arc_Kde2[i] = arc_Kde2[i]/arc_Kde3[i]
                         insertedArcs.append(arc_Kde2)
                     
@@ -553,7 +551,7 @@ class BayesianNetwork:
                         mlePar0.append(1)
                         for j in range(len(auxDictPar0.keys())):
                             mlePar0[i] = mlePar0[i]*auxDictPar0.get(j)[i]
-                        if mlePar0[i] <= 0: mlePar0[i] = math.log(MIN_DIVISOR)
+                        if mlePar0[i] <= 0: mlePar0[i] = math.log(MIN_VALUE)
                         else: mlePar0[i] = math.log(mlePar0[i])
                     mlePar0 = sum(mlePar0)
                 
@@ -568,7 +566,7 @@ class BayesianNetwork:
                         mlePar1.append(1)
                         for j in range(len(auxDictPar1.keys())):
                             mlePar1[i] = mlePar1[i]*auxDictPar1.get(j)[i]
-                        if mlePar1[i] <= 0: mlePar1[i] = math.log(MIN_DIVISOR)
+                        if mlePar1[i] <= 0: mlePar1[i] = math.log(MIN_VALUE)
                         else: mlePar1[i] = math.log(mlePar1[i])
                     mlePar1 = sum(mlePar1)
 
