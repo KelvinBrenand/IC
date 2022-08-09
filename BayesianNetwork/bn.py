@@ -7,6 +7,8 @@ import random
 import pickle
 import json
 
+MIN_DIVISOR = 0.001
+
 class BayesianNetwork:
     '''
     This class implements the 1D and nD Newton-Raphson's bandwidth estimator method, its helping methods, and the 1D 
@@ -76,7 +78,7 @@ class BayesianNetwork:
         Returns:
             float: KDE of the input data and bandwidth.
         """
-    
+        if h <= 0: h = MIN_DIVISOR
         sum = 0
         for i in range(len(data)):
             sum += self.__gaussian((x - data[i])/h)
@@ -105,7 +107,7 @@ class BayesianNetwork:
         Returns:
             int: Number of dimensions.
         """
-        if isinstance(x[0], float): return 1
+        if isinstance(x[0], (float, int)): return 1
         return len(x[0])
 
     def __listSubtraction(self, x, y):
@@ -135,7 +137,8 @@ class BayesianNetwork:
         """
         divisionResult = []
         for i in range(len(x)):
-            divisionResult.append(x[i]/y)
+            if y == 0: divisionResult.append(x[i]/MIN_DIVISOR)
+            else: divisionResult.append(x[i]/y)
         return divisionResult
 
     def __dot(self, x,y):
@@ -197,7 +200,8 @@ class BayesianNetwork:
         sum = 0
         for i in range(len(data)):
             sum += self.__multivariateGaussian(self.__listDivision(self.__listSubtraction(x, data[i]), h))
-        return (sum/(len(data)*h**self.__ndim(x)))
+        if (len(data)*h**self.__ndim(x)) == 0: return (sum/MIN_DIVISOR)
+        else: return (sum/(len(data)*h**self.__ndim(x)))
 
     def __intervalH(self, data):
         """Compute the right endpoint of the interval of values h can assume. The other endpoint is 0.1.
@@ -213,9 +217,10 @@ class BayesianNetwork:
             pointDist = []
             for j in data:
                 if i == j: continue
-                if isinstance(i, float): pointDist.append(math.dist([i],[j]))
+                if isinstance(i, (float, int)): pointDist.append(math.dist([i],[j]))
                 else: pointDist.append(math.dist(i,j))
-            minPointsDist.append(min(pointDist))
+            if pointDist == []: minPointsDist.append(MIN_DIVISOR)
+            else: minPointsDist.append(min(pointDist))
         return max(minPointsDist)
 
     def __LOO_Kde(self, data, index, num_h):
@@ -239,13 +244,14 @@ class BayesianNetwork:
             for i in range(len(dataSegment)):
                 element = dataSegmentCopy[i]
                 dataSegmentCopy.pop(i)
-                if isinstance(element, float): kde.append(self.__kernelDensityEstimation(element, dataSegmentCopy, h))
+                if isinstance(element, (float, int)): kde.append(self.__kernelDensityEstimation(element, dataSegmentCopy, h))
                 else: kde.append(self.__multivariateKernelDensityEstimation(element, dataSegmentCopy, h))
                 dataSegmentCopy.clear()
                 dataSegmentCopy = dataSegment.copy()
             log = []
             for i in range(len(kde)):
-                log.append(math.log(kde[i]))
+                if kde[i] <= 0: log.append(math.log(MIN_DIVISOR))
+                else: log.append(math.log(kde[i]))
             logsAndKdes.update({sum(log):kde})
         return logsAndKdes.get(max(logsAndKdes))
 
@@ -270,7 +276,7 @@ class BayesianNetwork:
 
         Args:
             data (list): The complete initial list.
-            index (tuple/int): The n specific columns.
+            index (tuple,int): The n specific columns.
 
         Returns:
             list: The specific columns of the N dimensional data.
@@ -393,12 +399,12 @@ class BayesianNetwork:
                     myList3.append(aux)
         return myList3
 
-    def fit(self, num_h=100):
+    def fit(self, num_h=10):
         """Compute the Maximum-Likelihood Estimation (MLE) of data and returns the adjacency matrix.
 
         Args:
             data (list): Data points to compute the MLE from.
-            num_h (int, optional): The amount of h to be used to compute the best KDE. Defaults to 100.
+            num_h (int, optional): The amount of h to be used to compute the best KDE. Defaults to 10.
 
         Raises:
             TypeError: data must be list.
@@ -423,7 +429,7 @@ class BayesianNetwork:
         for i in range(len(probs.get((0)))):
             for j in range(len(probs)):
                 probsMultiplication = probsMultiplication*probs.get((j))[i]
-                if probsMultiplication == 0: probsMultiplication = 0.001
+                if probsMultiplication == 0: probsMultiplication = MIN_DIVISOR
             auxList.append(math.log(probsMultiplication))
             probsMultiplication = 1.0
         last_MLE = sum(auxList)
@@ -439,7 +445,7 @@ class BayesianNetwork:
                     for i in range(len(arc_Kde)):
                         denominator = probs.get(elem[0])[i]
                         if denominator == 0:
-                            denominator = 0.001
+                            denominator = MIN_DIVISOR
                         arc_Kde[i] = arc_Kde[i]/denominator
                     sumInsertedArcs = arc_Kde.copy()
                 
@@ -454,7 +460,8 @@ class BayesianNetwork:
                         arc_Kde2 = self.__LOO_Kde(self.data, i, num_h)
                         if arc_Kde2 == None: return None
                         for i in range(len(arc_Kde)):
-                            arc_Kde[i] = arc_Kde2[i]/arc_Kde[i]
+                            if arc_Kde[i] == 0: arc_Kde[i] = arc_Kde2[i]/MIN_DIVISOR
+                            else: arc_Kde[i] = arc_Kde2[i]/arc_Kde[i]
                         insertedArcs.append(arc_Kde)
 
                     for i in range(len(insertedArcs[0])):
@@ -466,7 +473,8 @@ class BayesianNetwork:
                     arc_Kde = self.__LOO_Kde(self.data, elem, num_h)
                     if arc_Kde == None: return None
                     for i in range(len(arc_Kde)):
-                        arc_Kde[i] = arc_Kde[i]/probs.get(elem[0])[i]
+                        if probs.get(elem[0])[i] == 0: arc_Kde[i] = arc_Kde[i]/MIN_DIVISOR
+                        else: arc_Kde[i] = arc_Kde[i]/probs.get(elem[0])[i]
 
                     nodeProbPaths = self.__probPaths(self.__insertedArcs(arcs,elem[1]))
                     arcsAlreadyInTargetNode = []
@@ -481,7 +489,8 @@ class BayesianNetwork:
                             arc_Kde3 = self.__LOO_Kde(self.data, index, num_h)
                             if arc_Kde3 == None: return None
                         for i in range(len(arc_Kde)):
-                            arc_Kde2[i] = arc_Kde2[i]/arc_Kde3[i]
+                            if arc_Kde3[i] == 0: arc_Kde2[i] = arc_Kde2[i]/MIN_DIVISOR
+                            else: arc_Kde2[i] = arc_Kde2[i]/arc_Kde3[i]
                         arcsAlreadyInTargetNode.append(arc_Kde2)
                     
                     for i in range(len(arcsAlreadyInTargetNode[0])):
@@ -500,7 +509,8 @@ class BayesianNetwork:
                         arc_Kde2 = self.__LOO_Kde(self.data, i, num_h)
                         if arc_Kde2 == None: return None
                         for i in range(len(arc_Kde)):
-                            arc_Kde[i] = arc_Kde2[i]/arc_Kde[i]
+                            if arc_Kde[i] == 0: arc_Kde[i] = arc_Kde2[i]/MIN_DIVISOR
+                            else: arc_Kde[i] = arc_Kde2[i]/arc_Kde[i]
                         insertedArcs.append(arc_Kde)
 
                     nodeProbPaths = self.__probPaths(self.__insertedArcs(arcs,elem[1]))
@@ -515,7 +525,8 @@ class BayesianNetwork:
                             arc_Kde3 = self.__LOO_Kde(self.data, index, num_h)
                             if arc_Kde3 == None: return None
                         for i in range(len(arc_Kde)):
-                            arc_Kde2[i] = arc_Kde2[i]/arc_Kde3[i]
+                            if arc_Kde3[i] == 0: arc_Kde2[i] = arc_Kde2[i]/MIN_DIVISOR
+                            else: arc_Kde2[i] = arc_Kde2[i]/arc_Kde3[i]
                         insertedArcs.append(arc_Kde2)
                     
                     for i in range(len(insertedArcs[0])):
@@ -542,7 +553,8 @@ class BayesianNetwork:
                         mlePar0.append(1)
                         for j in range(len(auxDictPar0.keys())):
                             mlePar0[i] = mlePar0[i]*auxDictPar0.get(j)[i]
-                        mlePar0[i] = math.log(mlePar0[i])
+                        if mlePar0[i] <= 0: mlePar0[i] = math.log(MIN_DIVISOR)
+                        else: mlePar0[i] = math.log(mlePar0[i])
                     mlePar0 = sum(mlePar0)
                 
                 mtxCopy = copy.deepcopy(adjacency_matrix)
@@ -556,7 +568,8 @@ class BayesianNetwork:
                         mlePar1.append(1)
                         for j in range(len(auxDictPar1.keys())):
                             mlePar1[i] = mlePar1[i]*auxDictPar1.get(j)[i]
-                        mlePar1[i] = math.log(mlePar1[i])
+                        if mlePar1[i] <= 0: mlePar1[i] = math.log(MIN_DIVISOR)
+                        else: mlePar1[i] = math.log(mlePar1[i])
                     mlePar1 = sum(mlePar1)
 
                 if mlePar0 != None and mlePar1 != None:
@@ -575,12 +588,12 @@ class BayesianNetwork:
         self.graphProbabilities = probs
         self.adjacencyMatrix = adjacency_matrix
 
-    def __predictPoint(self, point, num_h=100):
+    def __predictPoint(self, point, num_h):
         """Compute the probability that the point belongs to a class.
 
         Args:
             point (list): N dimensional point where the mKDE will be estimated.
-            num_h (int, optional): The amount of h to be used to compute the best KDE. Defaults to 100.
+            num_h (int): The amount of h to be used to compute the best KDE.
 
         Returns:
             float: The probability of belonging.
@@ -593,13 +606,14 @@ class BayesianNetwork:
         return round(max(kde),3)
 
     @staticmethod
-    def predict(x_test, classLabels, networks):
+    def predict(x_test, classLabels, networks, num_h=10):
         """Predict the class for the provided data.
 
         Args:
             x_test (list): Test samples.
             classLabels (list): The classes labels.
             networks (list of BayesianNetwork): The classes.
+            num_h (int, optional): The amount of h to be used to compute the best KDE. Defaults to 10.
 
         Returns:
             list: Class labels for each data sample
@@ -608,18 +622,19 @@ class BayesianNetwork:
         for i in x_test:
             classPrediction = []
             for j in networks:
-                classPrediction.append(j.__predictPoint(i))
+                classPrediction.append(j.__predictPoint(i, num_h))
             y_pred.append(classLabels[classPrediction.index(max(classPrediction))])
         return y_pred
 
     @staticmethod
-    def kfoldcv(data, labels, k = 2, accuracy = False, confMtx = False):
+    def kfoldcv(data, labels, k = 10, num_h=10, accuracy = False, confMtx = False):
         """Perform the Kfold Cross Validation to obtain the best group of networks based on its accuracy value.
 
         Args:
             data (list): The data points.
             labels (list): The classes labels.
-            k (int, optional): Number of folds. Defaults to 2.
+            k (int, optional): Number of folds. Defaults to 10.
+            num_h (int, optional): The amount of h to be used to compute the best KDE. Defaults to 10.
             accuracy (bool, optional): Return the accuracy if true. Defaults to False.
             confMtx (bool, optional): Return the confusion matrix if true. Defaults to False.
 
@@ -643,6 +658,7 @@ class BayesianNetwork:
         for x in range(0, size, subset_size):
             count += 1
             if count > k: break
+            print("K:",count)
             X_train = data[:x]+data[x+subset_size:]
             y_train = labels[:x]+labels[x+subset_size:]
             X_test = data[x:x+subset_size]
@@ -652,15 +668,16 @@ class BayesianNetwork:
             networks = []
             for j in classes:
                 networks.append(BayesianNetwork([X_train[i] for i in range(len(y_train)) if y_train[i] == j]))
-            y_pred = BayesianNetwork.predict(X_test, classes, networks)
+            y_pred = BayesianNetwork.predict(X_test, classes, networks, num_h)
             netsAndYpredtestAndAcc.append((networks, y_test, y_pred, BayesianNetwork.accuracy(y_test, y_pred)))
         idxAndValueBestAcc = [0,0]
         for i in range(len(netsAndYpredtestAndAcc)):
             if netsAndYpredtestAndAcc[i][-1] > idxAndValueBestAcc[-1]:
                 idxAndValueBestAcc[0] = i
                 idxAndValueBestAcc[-1] = netsAndYpredtestAndAcc[i][-1]
-        for i in netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][0]:
-            i.fit()
+        # print("Fitting")
+        # for i in netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][0]:
+        #    i.fit()
 
         if accuracy and confMtx:
             return netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][0], netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][-1], BayesianNetwork.confusionMatrix(netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][1],netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][2])
