@@ -399,7 +399,7 @@ class BayesianNetwork:
                     myList3.append(aux)
         return myList3
 
-    def fit(self, num_h=10):
+    def getGraph(self, num_h=10):
         """Compute the Maximum-Likelihood Estimation (MLE) of data and returns the adjacency matrix.
 
         Args:
@@ -673,9 +673,6 @@ class BayesianNetwork:
             if netsAndYpredtestAndAcc[i][-1] > idxAndValueBestAcc[-1]:
                 idxAndValueBestAcc[0] = i
                 idxAndValueBestAcc[-1] = netsAndYpredtestAndAcc[i][-1]
-        # print("Fitting")
-        # for i in netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][0]:
-        #    i.fit()
 
         if accuracy and confMtx:
             return netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][0], netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][-1], BayesianNetwork.confusionMatrix(netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][1],netsAndYpredtestAndAcc[idxAndValueBestAcc[0]][2])
