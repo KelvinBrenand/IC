@@ -656,7 +656,6 @@ class BayesianNetwork:
         for x in range(0, size, subset_size):
             count += 1
             if count > k: break
-            print("K:",count)
             X_train = data[:x]+data[x+subset_size:]
             y_train = labels[:x]+labels[x+subset_size:]
             X_test = data[x:x+subset_size]
