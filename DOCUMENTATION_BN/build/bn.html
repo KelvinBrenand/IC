@@ -1,0 +1,711 @@
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>BAYESIAN NETWORK &#8212; BAYESIAN NETWORK 1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/cloud.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+
+    
+    
+     
+        <script src="_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="The Bayesin Network Method" href="index.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="index.html" title="The Bayesin Network Method"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">BAYESIAN NETWORK 1.0 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">BAYESIAN NETWORK</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-bn">
+<span id="bayesian-network"></span><h1>BAYESIAN NETWORK<a class="headerlink" href="#module-bn" title="Permalink to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="bn.BayesianNetwork">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bn.</span></span><span class="sig-name descname"><span class="pre">BayesianNetwork</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class implements the 1D and nD Newton-Raphson’s bandwidth estimator method, its helping methods, and the 1D
+and nD Kernel Density Estimation method.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.graphProbabilities">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">graphProbabilities</span></span><a class="headerlink" href="#bn.BayesianNetwork.graphProbabilities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all the probabilities of the graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The probabilities of the graph.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.adjacencyMatrix">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">adjacencyMatrix</span></span><a class="headerlink" href="#bn.BayesianNetwork.adjacencyMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the adjacency Matrix of the graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the adjacency Matrix of the graph</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__gaussian">
+<span class="sig-name descname"><span class="pre">__gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__gaussian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the gaussian kernel of a given value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>float</em>) – Value to be computed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Gaussian kernel of the input value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__kernelDensityEstimation">
+<span class="sig-name descname"><span class="pre">__kernelDensityEstimation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__kernelDensityEstimation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Using the gaussian kernel, it computes the Kernel Density Estimation (KDE) of the given data points and bandwidth parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – Point where the kde will be estimated.</p></li>
+<li><p><strong>data</strong> (<em>list</em>) – Data points to compute the KDE from.</p></li>
+<li><p><strong>h</strong> (<em>float</em>) – Bandwidth parameter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>KDE of the input data and bandwidth.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__identityMatrix">
+<span class="sig-name descname"><span class="pre">__identityMatrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__identityMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates an identity matrix of dimension NxN.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n</strong> (<em>int</em>) – Matrix’s dimension.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Identity matrix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__ndim">
+<span class="sig-name descname"><span class="pre">__ndim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__ndim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of array dimensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>list</em>) – value that should have its number of dimensions found.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Number of dimensions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__listSubtraction">
+<span class="sig-name descname"><span class="pre">__listSubtraction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__listSubtraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs the difference between two given lists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>list</em>) – First list.</p></li>
+<li><p><strong>y</strong> (<em>list</em>) – Second list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The difference between the two lists.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__listDivision">
+<span class="sig-name descname"><span class="pre">__listDivision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__listDivision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs the division operation between the elements of two given lists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>list</em>) – First list.</p></li>
+<li><p><strong>y</strong> (<em>list</em>) – Second list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The result of the division.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__dot">
+<span class="sig-name descname"><span class="pre">__dot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__dot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dot product of two values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>list</em>) – First list.</p></li>
+<li><p><strong>y</strong> (<em>list</em>) – Second list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>If x and y are both NxN, it returns the square matrix multiplication.</dt><dd><p>If x is 1D and y is 2D, it returns the resulting list of the sum product.
+If x and y are both 1D, it returns the resulting float of the inner product.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list or float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__multivariateGaussian">
+<span class="sig-name descname"><span class="pre">__multivariateGaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__multivariateGaussian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the multivariate gaussian kernel of a given value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>list</em>) – Value to be computed.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Multivariate gaussian kernel of the input value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__multivariateKernelDensityEstimation">
+<span class="sig-name descname"><span class="pre">__multivariateKernelDensityEstimation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__multivariateKernelDensityEstimation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Using the multivariate gaussian kernel, it computes the Multivariate Kernel Density Estimation (MKDE) of
+the given data points and bandwidth parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>list</em>) – N dimensional point where the mKDE will be estimated.</p></li>
+<li><p><strong>data</strong> (<em>list</em>) – Data points to compute the KDE from.</p></li>
+<li><p><strong>h</strong> (<em>float</em>) – Bandwidth parameter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>KDE of the input data and bandwidth.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__intervalH">
+<span class="sig-name descname"><span class="pre">__intervalH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__intervalH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the right endpoint of the interval of values h can assume. The other endpoint is 0.1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>List</em>) – Data points to compute the interval from.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The right endpoint.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__LOO_Kde">
+<span class="sig-name descname"><span class="pre">__LOO_Kde</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_h</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__LOO_Kde" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs the bandwidth estimation and the Leave-One-Out KDE for either the 1D KDE or the Multivariate KDE.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>List</em>) – Data points to compute the KDE from.</p></li>
+<li><p><strong>index</strong> (<em>tuple</em><em>, </em><em>int</em>) – The index of columns to use in the data partition method.</p></li>
+<li><p><strong>num_h</strong> (<em>int</em>) – The amount of h to be used to compute the best KDE.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>KDE of myData and bandwidth h.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__pairs">
+<span class="sig-name descname"><span class="pre">__pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__pairs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all possible pairs from 0 up to n. E.g.: For n = 2, it will return [(0,1),(1,0),(0,2),(2,0),(1,2),(2,1)].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n</strong> (<em>int</em>) – The upper limit from where the method will generate the pairs.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The list of all the pairs.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of tuples</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__dataPartition">
+<span class="sig-name descname"><span class="pre">__dataPartition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__dataPartition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns n specific columns from a N dimensional list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>list</em>) – The complete initial list.</p></li>
+<li><p><strong>index</strong> (<em>tuple</em><em>,</em><em>int</em>) – The n specific columns.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The specific columns of the N dimensional data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__mtxModifier">
+<span class="sig-name descname"><span class="pre">__mtxModifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__mtxModifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modifies the adjacency matrix that will be returned by the MLE method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matrix</strong> (<em>list</em>) – Initial adjacency matrix.</p></li>
+<li><p><strong>index</strong> (<em>list</em>) – The index that will be modified in the adjacency matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The modified adjacency matrix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__trace">
+<span class="sig-name descname"><span class="pre">__trace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__trace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum of diagonal elements of a matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>matrix</strong> (<em>list</em>) – The matrix that will have its diagonal elements summed up.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The sum of diagonal elements.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__cycle">
+<span class="sig-name descname"><span class="pre">__cycle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__cycle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Detects cycles in an adjacency matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>matrix</strong> (<em>list</em>) – The matrix that will be verified.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if the matrix has cycles. False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__insertedArcs">
+<span class="sig-name descname"><span class="pre">__insertedArcs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elem</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__insertedArcs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary with all nodes associated to elem.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arcs</strong> (<em>list</em>) – List with all the nodes and all the arcs.</p></li>
+<li><p><strong>elem</strong> (<em>int</em>) – Target node</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>All nodes associated to elem.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__probPaths">
+<span class="sig-name descname"><span class="pre">__probPaths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arcs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__probPaths" title="Permalink to this definition">¶</a></dt>
+<dd><p>All the necessary ways to calculate the probability of a node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>arcs</strong> (<em>dictionary</em>) – All nodes associated to a target node.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>All probability paths associated with a target node.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.getGraph">
+<span class="sig-name descname"><span class="pre">getGraph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.getGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the Maximum-Likelihood Estimation (MLE) of data and returns the adjacency matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>list</em>) – Data points to compute the MLE from.</p></li>
+<li><p><strong>num_h</strong> (<em>int</em><em>, </em><em>optional</em>) – The amount of h to be used to compute the best KDE. Defaults to 10.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>TypeError</strong> – data must be list.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The adjacency matrix associated with data.
+None: If a RuntimeError happened.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__predictPoint">
+<span class="sig-name descname"><span class="pre">__predictPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_h</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.__predictPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the probability that the point belongs to a class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>point</strong> (<em>list</em>) – N dimensional point where the mKDE will be estimated.</p></li>
+<li><p><strong>num_h</strong> (<em>int</em>) – The amount of h to be used to compute the best KDE.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The probability of belonging.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.predict">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classLabels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">networks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict the class for the provided data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_test</strong> (<em>list</em>) – Test samples.</p></li>
+<li><p><strong>classLabels</strong> (<em>list</em>) – The classes labels.</p></li>
+<li><p><strong>networks</strong> (<em>list of BayesianNetwork</em>) – The classes.</p></li>
+<li><p><strong>num_h</strong> (<em>int</em><em>, </em><em>optional</em>) – The amount of h to be used to compute the best KDE. Defaults to 10.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Class labels for each data sample</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.kfoldcv">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kfoldcv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confMtx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.kfoldcv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the Kfold Cross Validation to obtain the best group of networks based on its accuracy value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>list</em>) – The data points.</p></li>
+<li><p><strong>labels</strong> (<em>list</em>) – The classes labels.</p></li>
+<li><p><strong>k</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of folds. Defaults to 10.</p></li>
+<li><p><strong>num_h</strong> (<em>int</em><em>, </em><em>optional</em>) – The amount of h to be used to compute the best KDE. Defaults to 10.</p></li>
+<li><p><strong>accuracy</strong> (<em>bool</em><em>, </em><em>optional</em>) – Return the accuracy if true. Defaults to False.</p></li>
+<li><p><strong>confMtx</strong> (<em>bool</em><em>, </em><em>optional</em>) – Return the confusion matrix if true. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Number of folds k must be greater than 1 and smaller than the data size.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The best group of networks.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list of BayesianNetwork</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.accuracy">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">accuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actual</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.accuracy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accuracy classification score.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>actual</strong> (<em>list</em>) – Correct labels.</p></li>
+<li><p><strong>predicted</strong> (<em>list</em>) – Predicted labels.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The percentage of correctly classified samples.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.__weakref__">
+<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#bn.BayesianNetwork.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.confusionMatrix">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">confusionMatrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actual</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.confusionMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the confusion matrix to evaluate classification accuracy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>actual</strong> (<em>list</em>) – Correct labels.</p></li>
+<li><p><strong>predicted</strong> (<em>list</em>) – Predicted labels.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The confusion matrix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the network model into a pickle file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>string</em>) – The path of the file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the network model from a pickle file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>string</em>) – The path of the file</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An object of the BayesianNetwork class</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#bn.BayesianNetwork" title="bn.BayesianNetwork">BayesianNetwork</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bn.BayesianNetwork.saveJson">
+<span class="sig-name descname"><span class="pre">saveJson</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bn.BayesianNetwork.saveJson" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the network model into a json file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>string</em>) – The path of the file</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div class="sphinxprev">
+    <h4>Previous page</h4>
+    <p class="topless"><a href="index.html"
+                          title="Previous page">&larr; The Bayesin Network Method</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/bn.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="index.html" title="The Bayesin Network Method"
+             >previous</a> &nbsp; &nbsp;</li>
+    <li><a href="index.html">BAYESIAN NETWORK 1.0 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">BAYESIAN NETWORK</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, KELVIN BRENAND AND LEANDRO CARLOS SOUZA.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>
